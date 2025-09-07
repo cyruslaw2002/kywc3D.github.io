@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班級相册 - 我們的回憶</title>
+    <style>
+        /* 基本樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 導航欄樣式 - 與主站一致 */
+        nav {
+            background: #35424a;
+            color: white;
+            padding: 1rem 0;
+        }
+        
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            list-style: none;
+            display: flex;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #e8491d;
+        }
+        
+        /* 相册專用樣式 */
+        .gallery-header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .gallery-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .gallery-intro {
+            text-align: center;
+            padding: 2rem 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* 篩選按鈕 */
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 0 1rem;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #35424a;
+            background: white;
+            color: #35424a;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #35424a;
+            color: white;
+        }
+        
+        /* 相册網格 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem 0;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 1rem;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+        
+        .gallery-item:hover .image-overlay {
+            transform: translateY(0);
+        }
+        
+        .image-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .image-date {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* 模態框（彈出大圖） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+        
+        .modal-caption {
+            color: white;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .filter-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-btn {
+                width: 200px;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+            }
+            
+            .nav-links li {
+                margin: 0.5rem 0;
+            }
+        }
+        
+        /* 頁尾樣式 */
+        footer {
+            background: #35424a;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav>
+        <div class="container">
+            <div class="logo">班級相册</div>
+            <ul class="nav-links">
+                <li><a href="index.html">回首頁</a></li>
+                <li><a href="gallery.html" class="active">相册</a></li>
+                <li><a href="#class-activities">班級活動</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 相册標頭 -->
+    <header class="gallery-header">
+        <div class="container">
+            <h1>KYWC_2D 美好回憶</h1>
+            <p>記錄我們一起走過的點點滴滴</p>
+        </div>
+    </header>
+
+    <!-- 相册介紹 -->
+    <section class="gallery-intro">
+        <div class="container">
+            <h2>我們的青春時光</h2>
+            <p>這裡收藏著我們班的珍貴時刻，從開學到畢業，每一個笑容都值得被記住。</p>
+        </div>
+    </section>
+
+    <!-- 篩選按鈕 -->
+    <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">全部照片</button>
+        <button class="filter-btn" data-filter="activity">班級活動</button>
+        <button class="filter-btn" data-filter="sports">運動會</button>
+        <button class="filter-btn" data-filter="trip">校外教學</button>
+    </div>
+
+    <!-- 相册網格 -->
+    <div class="container">
+        <div class="gallery-grid" id="photo-gallery">
+            <!-- 照片會透過JavaScript動態生成 -->
+        </div>
+    </div>
+
+    <!-- 模態框 -->
+    <div class="modal" id="image-modal">
+        <button class="close-modal">&times;</button>
+        <div class="modal-content">
+            <img class="modal-image" id="modal-img" src="" alt="">
+            <div class="modal-caption" id="modal-caption"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 三年二班相册。珍貴回憶，永留存。</p>
+        </div>
+    </footer>
+
+    <script>
+        // 相册資料 - 您可以替換成真實的照片
+        const galleryData = [
+            {
+                src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400",
+                title: "開學第一天",
+                date: "2023-09-01",
+                category: "activity",
+                description: "新學期開始，大家充滿期待的笑容"
+            },
+            {
+                src: "https://images.unsplash.com/photo-1541336032412-2048a678540d?w=400",
+                title: "運動會接力賽",
+                date: "2023-10-15",
+                category: "sports",
+                description: "團結合作，為班級爭光"
+            },
+            {
+                src: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400",
+                title: "科博館校外教學",
+                date: "2023-11-20",
+                category: "trip",
+                description: "探索科學的奧秘，滿載而歸"
+            },
+            {
+                src: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=400",
+                title: "聖誕晚會",
+                date: "2023-12-24",
+                category: "activity",
+                description: "溫馨的聖誕夜晚，歡笑不斷"
+            },
+            {
+                src: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=400",
+                title: "籃球比賽",
+                date: "2024-03-10",
+                category: "sports",
+                description: "揮灑汗水，展現團隊精神"
+            },
+            {
+                src: "https://images.unsplash.com/photo-1535982337059-51a5b2d3c079?w=400",
+                title: "畢業旅行",
+                date: "2024-04-05",
+                category: "trip",
+                description: "最後的班遊，最美的回憶"
+            },
+            {
+                src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400",
+                title: "畢業典禮",
+                date: "2024-06-15",
+                category: "graduation",
+                description: "穿上畢業服，迎接新旅程"
+            },
+            {
+                src: "https://images.unsplash.com/photo-1541336032412-2048a678540d?w=400",
+                title: "班級聚餐",
+                date: "2024-06-20",
+                category: "activity",
+                description: "最後的相聚，永遠的朋友"
+            }
+        ];
+
+        // 初始化相册
+        function initGallery() {
+            const galleryGrid = document.getElementById('photo-gallery');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-img');
+            const modalCaption = document.getElementById('modal-caption');
+            const closeModal = document.querySelector('.close-modal');
+
+            // 渲染相册照片
+            function renderGallery(filter = 'all') {
+                galleryGrid.innerHTML = '';
+                
+                const filteredData = filter === 'all' 
+                    ? galleryData 
+                    : galleryData.filter(item => item.category === filter);
+                
+                filteredData.forEach(item => {
+                    const galleryItem = document.createElement('div');
+                    galleryItem.className = 'gallery-item';
+                    galleryItem.dataset.category = item.category;
+                    
+                    galleryItem.innerHTML = `
+                        <img src="${item.src}" alt="${item.title}" class="gallery-image">
+                        <div class="image-overlay">
+                            <div class="image-title">${item.title}</div>
+                            <div class="image-date">${item.date}</div>
+                        </div>
+                    `;
+                    
+                    galleryItem.addEventListener('click', () => {
+                        modal.style.display = 'flex';
+                        modalImg.src = item.src;
+                        modalCaption.textContent = item.description;
+                    });
+                    
+                    galleryGrid.appendChild(galleryItem);
+                });
+            }
+
+            // 篩選按鈕事件
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // 移除所有active類別
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    // 添加active到當前按鈕
+                    button.classList.add('active');
+                    // 渲染篩選後的照片
+                    renderGallery(button.dataset.filter);
+                });
+            });
+
+            // 關閉模態框
+            closeModal.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            // 點擊模態框背景關閉
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // 初始渲染
+            renderGallery();
+        }
+
+        // 當頁面載入完成時初始化相册
+        document.addEventListener('DOMContentLoaded', initGallery);
+    </script>
+</body>
+<script>
+// 檢查登入狀態
+function checkAuth() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!isLoggedIn || !authToken) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    
+    try {
+        // 驗證token是否有效
+        const tokenData = JSON.parse(atob(authToken));
+        const currentTime = Date.now();
+        const tokenAge = currentTime - tokenData.timestamp;
+        
+        // Token有效期24小時
+        if (tokenAge > 24 * 60 * 60 * 1000) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userRole');
+        window.location.href = 'login.html';
+        return false;
+    }
+}
+
+// 頁面載入時檢查權限
+if (!checkAuth()) {
+    // 如果未登入，會自動跳轉到登入頁面
+}
+</script>
+</html>
