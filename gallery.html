@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班級相册 - 我們的回憶</title>
+    <style>
+        /* 基本樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 導航欄樣式 - 與主站一致 */
+        nav {
+            background: #35424a;
+            color: white;
+            padding: 1rem 0;
+        }
+        
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            list-style: none;
+            display: flex;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #e8491d;
+        }
+        
+        /* 相册專用樣式 */
+        .gallery-header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .gallery-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .gallery-intro {
+            text-align: center;
+            padding: 2rem 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* 篩選按鈕 */
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 0 1rem;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #35424a;
+            background: white;
+            color: #35424a;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #35424a;
+            color: white;
+        }
+        
+        /* 相册網格 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem 0;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 1rem;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+        
+        .gallery-item:hover .image-overlay {
+            transform: translateY(0);
+        }
+        
+        .image-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .image-date {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .image-description {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+        
+        /* 燈箱樣式 */
+        #lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 2rem;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lightbox-image {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .lightbox-caption {
+            color: white;
+            text-align: center;
+            margin-top: 1.5rem;
+            max-width: 600px;
+        }
+
+        .lightbox-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .lightbox-description {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .lightbox-date {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        .lightbox-content .close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .filter-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-btn {
+                width: 200px;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+            }
+            
+            .nav-links li {
+                margin: 0.5rem 0;
+            }
+
+            .lightbox-content {
+                max-width: 95%;
+            }
+            
+            .lightbox-title {
+                font-size: 1.2rem;
+            }
+            
+            .lightbox-description {
+                font-size: 1rem;
+            }
+        }
+        
+        /* 頁尾樣式 */
+        footer {
+            background: #35424a;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav>
+        <div class="container">
+            <div class="logo">班級相册</div>
+            <ul class="nav-links">
+                <li><a href="index.html">回首頁</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 相册標頭 -->
+    <header class="gallery-header">
+        <div class="container">
+            <h1>KYWC_3D 美好回憶</h1>
+            <p>記錄我們一起走過的點點滴滴</p>
+        </div>
+    </header>
+
+    <!-- 相册介紹 -->
+    <section class="gallery-intro">
+        <div class="container">
+            <h2>我們的青春時光</h2>
+            <p>這裡收藏著我們班的珍貴時刻，從開學到畢業，每一個笑容都值得被記住。</p>
+        </div>
+    </section>
+
+    <!-- 篩選按鈕 -->
+    <div class="filter-buttons">
+        <button class="filter-btn active" data-category="all">全部照片</button>
+        <button class="filter-btn" data-category="activity">班級活動</button>
+        <button class="filter-btn" data-category="sports">運動會</button>
+        <button class="filter-btn" data-category="trip">校外教學</button>
+        <button class="filter-btn" data-category="teachers">老師照片</button>
+    </div>
+
+    <!-- 相册網格 -->
+    <div class="container">
+        <div class="gallery-grid" id="photo-gallery">
+            <!-- 照片會透過JavaScript動態生成 -->
+        </div>
+    </div>
+
+    <!-- 燈箱 -->
+    <div id="lightbox">
+        <div class="lightbox-content">
+            <span class="close">&times;</span>
+            <img src="" alt="" class="lightbox-image">
+            <div class="lightbox-caption">
+                <h3 class="lightbox-title"></h3>
+                <p class="lightbox-description"></p>
+                <p class="lightbox-date"></p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 KYWC_3D 班級相册。珍貴回憶，永留存。</p>
+        </div>
+    </footer>
+
+    <script>
+        // 圖片資料庫 - 使用本地 images 資料夾
+        const imageDatabase = [
+            // 班級活動照片
+            {
+                id: 1,
+                filename: 'class_photo_1.jpg',
+                path: 'images/gallery/class_photo_1.jpeg',
+                title: '2025年開學合照',
+                description: '新學期開始的全班大合照',
+                date: '2025-08-30',
+                category: 'activity',
+                tags: ['開學', '合照', '全班']
+            },
+            {
+                id: 2,
+                filename: 'christmas_party.jpg',
+                path: 'images/gallery/christmas_party.jpg',
+                title: '聖誕晚會',
+                description: '溫馨的聖誕夜晚，歡笑不斷',
+                date: '2025-12-24',
+                category: 'activity',
+                tags: ['聖誕', '晚會', '慶祝']
+            },
+            {
+                id: 3,
+                filename: 'class_dinner.jpg',
+                path: 'images/gallery/class_dinner.jpg',
+                title: '班級聚餐',
+                description: '最後的相聚，永遠的朋友',
+                date: '2026-06-20',
+                category: 'activity',
+                tags: ['聚餐', '畢業', '友情']
+            },
+
+            // 運動會照片
+            {
+                id: 4,
+                filename: 'sports_relay.jpg',
+                path: 'images/gallery/sports_relay.jpeg',
+                title: '2025元朗手球盃',
+                description: '郭中手球隊出戰元朗手球盃季軍戰賽事',
+                date: '2025-08-30',
+                category: 'sports',
+                tags: ['運動會', '接力賽', '比賽']
+            },
+            {
+                id: 5,
+                filename: 'basketball_game.jpg',
+                path: 'images/gallery/basketball_game.jpg',
+                title: '籃球比賽',
+                description: '揮灑汗水，展現團隊精神',
+                date: '2026-03-10',
+                category: 'sports',
+                tags: ['籃球', '比賽', '體育']
+            },
+
+            // 校外教學照片
+            {
+                id: 6,
+                filename: 'science_museum.jpg',
+                path: 'images/gallery/science_museum.jpg',
+                title: '科博館校外教學',
+                description: '探索科學的奧秘，滿載而歸',
+                date: '2025-11-20',
+                category: 'trip',
+                tags: ['校外教學', '科學', '學習']
+            },
+            {
+                id: 7,
+                filename: 'graduation_trip.jpg',
+                path: 'images/gallery/graduation_trip.jpg',
+                title: '畢業旅行',
+                description: '最後的班遊，最美的回憶',
+                date: '2026-04-05',
+                category: 'trip',
+                tags: ['畢業旅行', '旅行', '回憶']
+            },
+
+            // 老師照片
+            {
+                id: 8,
+                filename: 'teacher_zhang.jpg',
+                path: 'images/teachers/teacher_zhang.jpg',
+                title: '張老師',
+                description: '班導師/國文老師 - 擁有15年教學經驗',
+                date: '2025-09-01',
+                category: 'teachers',
+                tags: ['老師', '導師', '國文']
+            },
+            {
+                id: 9,
+                filename: 'teacher_li.jpg',
+                path: 'images/teachers/teacher_li.jpg',
+                title: '李老師',
+                description: '數學老師 - 教學風格生動有趣',
+                date: '2025-09-01',
+                category: 'teachers',
+                tags: ['老師', '數學', '教學']
+            },
+            {
+                id: 10,
+                filename: 'teacher_wang.jpg',
+                path: 'images/teachers/teacher_wang.jpg',
+                title: '王老師',
+                description: '英文老師 - 注重實用英語能力培養',
+                date: '2025-09-01',
+                category: 'teachers',
+                tags: ['老師', '英文', '語言']
+            }
+        ];
+
+        // 初始化相册
+        function initGallery() {
+            const galleryGrid = document.getElementById('photo-gallery');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            // 渲染相册照片
+            function renderGallery(category = 'all') {
+                galleryGrid.innerHTML = '';
+                
+                let filteredData = [];
+                if (category === 'all') {
+                    filteredData = imageDatabase;
+                } else {
+                    filteredData = imageDatabase.filter(item => item.category === category);
+                }
+                
+                filteredData.forEach(item => {
+                    const galleryItem = document.createElement('div');
+                    galleryItem.className = 'gallery-item';
+                    galleryItem.dataset.category = item.category;
+                    
+                    galleryItem.innerHTML = `
+                        <img src="${item.path}" alt="${item.title}" class="gallery-image" loading="lazy">
+                        <div class="image-overlay">
+                            <div class="image-title">${item.title}</div>
+                            <div class="image-date">${item.date}</div>
+                            <div class="image-description">${item.description}</div>
+                        </div>
+                    `;
+                    
+                    galleryItem.addEventListener('click', () => {
+                        openLightbox(item);
+                    });
+                    
+                    galleryGrid.appendChild(galleryItem);
+                });
+            }
+
+            // 打開燈箱
+            function openLightbox(imageInfo) {
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImage = lightbox.querySelector('.lightbox-image');
+                const lightboxTitle = lightbox.querySelector('.lightbox-title');
+                const lightboxDescription = lightbox.querySelector('.lightbox-description');
+                const lightboxDate = lightbox.querySelector('.lightbox-date');
+
+                lightboxImage.src = imageInfo.path;
+                lightboxImage.alt = imageInfo.title;
+                lightboxTitle.textContent = imageInfo.title;
+                lightboxDescription.textContent = imageInfo.description;
+                lightboxDate.textContent = imageInfo.date;
+
+                lightbox.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            // 關閉燈箱
+            function closeLightbox() {
+                const lightbox = document.getElementById('lightbox');
+                lightbox.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
+            // 篩選按鈕事件
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // 移除所有active類別
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    // 添加active到當前按鈕
+                    button.classList.add('active');
+                    // 渲染篩選後的照片
+                    renderGallery(button.dataset.category);
+                });
+            });
+
+            // 燈箱關閉事件
+            document.querySelector('.close').addEventListener('click', closeLightbox);
+            document.getElementById('lightbox').addEventListener('click', (e) => {
+                if (e.target.id === 'lightbox') {
+                    closeLightbox();
+                }
+            });
+
+            // ESC鍵關閉燈箱
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                }
+            });
+
+            // 初始渲染
+            renderGallery();
+        }
+
+        // 當頁面載入完成時初始化相册
+        document.addEventListener('DOMContentLoaded', initGallery);
+    </script>
+
+    <script>
+    // 檢查登入狀態
+    function checkAuth() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const authToken = localStorage.getItem('authToken');
+        
+        if (!isLoggedIn || !authToken) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        try {
+            // 驗證token是否有效
+            const tokenData = JSON.parse(atob(authToken));
+            const currentTime = Date.now();
+            const tokenAge = currentTime - tokenData.timestamp;
+            
+            // Token有效期24小時
+            if (tokenAge > 24 * 60 * 60 * 1000) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userRole');
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+            return false;
+        }
+    }
+
+    // 頁面載入時檢查權限
+    if (!checkAuth()) {
+        // 如果未登入，會自動跳轉到登入頁面
+    }
+
+    // 顯示當前用戶
+    function displayCurrentUser() {
+        const userRole = localStorage.getItem('userRole');
+        if (userRole) {
+            // 在導航欄顯示用戶信息
+            const userInfo = document.createElement('li');
+            userInfo.innerHTML = `<span style="color: #e8491d;">歡迎, ${userRole}</span>`;
+            
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.appendChild(userInfo);
+        }
+    }
+
+    // 頁面載入時顯示用戶
+    document.addEventListener('DOMContentLoaded', function() {
+        displayCurrentUser();
+        
+        // 定期檢查登入狀態（每5分鐘）
+        setInterval(checkAuth, 5 * 60 * 1000);
+    });
+    </script>
+</body>
+</html>
