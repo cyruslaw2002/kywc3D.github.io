@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班級日曆 - 三年二班</title>
+    <style>
+        /* 共用樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 導航欄樣式 */
+        nav {
+            background: #35424a;
+            color: white;
+            padding: 1rem 0;
+        }
+        
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            list-style: none;
+            display: flex;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #e8491d;
+        }
+        
+        /* 頁面標頭 */
+        .page-header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* 年份選擇器 */
+        .year-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .year-btn {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid #35424a;
+            background: white;
+            color: #35424a;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .year-btn:hover,
+        .year-btn.active {
+            background: #35424a;
+            color: white;
+        }
+        
+        /* 月份導航 */
+        .month-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .nav-btn {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid #35424a;
+            background: white;
+            color: #35424a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .nav-btn:hover {
+            background: #35424a;
+            color: white;
+        }
+        
+        .current-month {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #35424a;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        /* 月曆視圖 */
+        .calendar-month {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #35424a;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            font-weight: bold;
+        }
+        
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #ddd;
+        }
+        
+        .calendar-day {
+            background: white;
+            min-height: 120px;
+            padding: 0.8rem;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .calendar-day:hover {
+            background: #f8f9fa;
+        }
+        
+        .day-number {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #35424a;
+            font-size: 1.1rem;
+        }
+        
+        .day-events {
+            font-size: 0.75rem;
+        }
+        
+        .event-item {
+            padding: 0.2rem 0.4rem;
+            margin-bottom: 0.2rem;
+            border-radius: 3px;
+            border-left: 3px solid;
+            background: #f0f8ff;
+            font-size: 0.7rem;
+            line-height: 1.3;
+        }
+        
+        .event-holiday {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+        
+        .event-exam {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .event-activity {
+            border-left-color: #4caf50;
+            background: #e8f5e8;
+        }
+        
+        .event-ceremony {
+            border-left-color: #9c27b0;
+            background: #f3e5f5;
+        }
+        
+        .event-meeting {
+            border-left-color: #2196f3;
+            background: #e3f2fd;
+        }
+        
+        .other-month {
+            background: #f8f9fa;
+            color: #999;
+        }
+        
+        .today {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+        }
+        
+        .has-events {
+            background: #e8f5e8;
+        }
+        
+        /* 事件模態框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-date {
+            font-size: 1.5rem;
+            color: #35424a;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .event-detail {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .event-detail h3 {
+            color: #35424a;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .weekdays {
+                display: none;
+            }
+            
+            .days-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-day {
+                min-height: 80px;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+            }
+            
+            .nav-links li {
+                margin: 0.5rem 0;
+            }
+            
+            .month-navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .year-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .year-btn {
+                width: 150px;
+            }
+        }
+        
+        /* 頁尾樣式 */
+        footer {
+            background: #35424a;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav>
+        <div class="container">
+            <div class="logo">班級日曆</div>
+            <ul class="nav-links">
+                <li><a href="index.html">回首頁</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 頁面標頭 -->
+    <header class="page-header">
+        <div class="container">
+            <h1>2025-2026 學年日曆</h1>
+            <p>重要日期與活動安排</p>
+        </div>
+    </header>
+
+    <!-- 年份選擇器 -->
+    <div class="container">
+        <div class="year-selector">
+            <button class="year-btn active" data-year="2025">2025年</button>
+            <button class="year-btn" data-year="2026">2026年</button>
+        </div>
+
+        <!-- 月份導航 -->
+        <div class="month-navigation">
+            <button class="nav-btn" id="prev-month">上個月</button>
+            <span class="current-month" id="current-month">2025年9月</span>
+            <button class="nav-btn" id="next-month">下個月</button>
+        </div>
+
+        <!-- 圖例 -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ffebee; border-left: 3px solid #f44336;"></div>
+                <span>考試測驗</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e8f5e8; border-left: 3px solid #4caf50;"></div>
+                <span>活動項目</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #fff3e0; border-left: 3px solid #ff9800;"></div>
+                <span>假期節日</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f3e5f5; border-left: 3px solid #9c27b0;"></div>
+                <span>典禮儀式</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e3f2fd; border-left: 3px solid #2196f3;"></div>
+                <span>會議講座</span>
+            </div>
+        </div>
+
+        <!-- 月曆視圖 -->
+        <div class="calendar-month" id="calendar-view">
+            <div class="weekdays">
+                <div>週日</div>
+                <div>週一</div>
+                <div>週二</div>
+                <div>週三</div>
+                <div>週四</div>
+                <div>週五</div>
+                <div>週六</div>
+            </div>
+            <div class="days-grid" id="days-grid">
+                <!-- 日期會透過JavaScript動態生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 事件模態框 -->
+    <div class="modal" id="event-modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2 class="modal-date" id="modal-date">日期標題</h2>
+            <div id="modal-events">
+                <!-- 事件內容會透過JavaScript動態生成 -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025-2026 3D班日曆。重要時刻，不容錯過。</p>
+        </div>
+    </footer>
+
+    <script>
+        // 班級活動資料 - 根據您提供的日期重新整理
+        const eventsData = [
+            // 2025年9月
+            { date: "2025-09-01", title: "開學禮", type: "ceremony" },
+            { date: "2025-09-01", title: "適應周開始", type: "activity" },
+            { date: "2025-09-02", title: "班務日", type: "activity" },
+            { date: "2025-09-03", title: "班務日", type: "activity" },
+            { date: "2025-09-03", title: "中國人民抗日戰爭勝利紀念日", type: "holiday" },
+            { date: "2025-09-04", title: "第一循環開學周開始（半天上課）", type: "activity" },
+            { date: "2025-09-10", title: "敬師日", type: "activity" },
+            { date: "2025-09-12", title: "適應周結束", type: "activity" },
+            { date: "2025-09-12", title: "第一循環開學周結束", type: "activity" },
+            { date: "2025-09-18", title: "「九‧一八」事變紀念日", type: "holiday" },
+            { date: "2025-09-19", title: "班主任課（一）", type: "meeting" },
+            { date: "2025-09-23", title: "中國農民豐收節", type: "holiday" },
+            { date: "2025-09-24", title: "薪火相傳交流團", type: "activity" },
+            { date: "2025-09-25", title: "價值教育日", type: "activity" },
+            { date: "2025-09-27", title: "薪火相傳交流團結束", type: "activity" },
+            { date: "2025-09-30", title: "烈士紀念日", type: "holiday" },
+
+            // 2025年10月
+            { date: "2025-10-01", title: "國慶日", type: "holiday" },
+            { date: "2025-10-03", title: "中一家長晚會及家教會周年會員大會", type: "meeting" },
+            { date: "2025-10-06", title: "自主學習日", type: "activity" },
+            { date: "2025-10-06", title: "中秋節", type: "holiday" },
+            { date: "2025-10-07", title: "中秋節翌日", type: "holiday" },
+            { date: "2025-10-09", title: "捐血日", type: "activity" },
+            { date: "2025-10-10", title: "中二至中三家長晚會", type: "meeting" },
+            { date: "2025-10-11", title: "元朗區校長會主辦創客嘉年華", type: "activity" },
+            { date: "2025-10-28", title: "中四至中六級家長晚會", type: "meeting" },
+            { date: "2025-10-29", title: "重陽節", type: "holiday" },
+
+            // 2025年11月
+            { date: "2025-11-10", title: "第一次中一至中五級測驗開始", type: "exam" },
+            { date: "2025-11-10", title: "第一次中六級模擬考試開始", type: "exam" },
+            { date: "2025-11-15", title: "補測/補考日", type: "exam" },
+            { date: "2025-11-18", title: "測驗/模擬考試結束", type: "exam" },
+            { date: "2025-11-19", title: "補測/補考日", type: "exam" },
+            { date: "2025-11-21", title: "班主任課（三）/ 環校跑", type: "activity" },
+            { date: "2025-11-22", title: "學友社模擬考試", type: "exam" },
+            { date: "2025-11-28", title: "東華三院疫苗接種", type: "activity" },
+            { date: "2025-11-29", title: "南華早報模擬考試", type: "exam" },
+
+            // 2025年12月
+            { date: "2025-12-02", title: "師生拍照日", type: "activity" },
+            { date: "2025-12-04", title: "國家憲法日", type: "holiday" },
+            { date: "2025-12-05", title: "班主任課（四）", type: "meeting" },
+            { date: "2025-12-06", title: "升中資訊日", type: "activity" },
+            { date: "2025-12-07", title: "第八屆立法會選舉", type: "activity" },
+            { date: "2025-12-08", title: "選舉日翌日", type: "activity" },
+            { date: "2025-12-11", title: "運動會", type: "activity" },
+            { date: "2025-12-12", title: "運動會", type: "activity" },
+            { date: "2025-12-13", title: "南京大屠殺死難者國家公祭日", type: "holiday" },
+            { date: "2025-12-23", title: "聖誕聯歡及歌唱比賽", type: "activity" },
+            { date: "2025-12-24", title: "聖誕及新年假期開始", type: "holiday" },
+
+            // 2026年1月
+            { date: "2026-01-01", title: "元旦", type: "holiday" },
+            { date: "2026-01-03", title: "聖誕及新年假期結束", type: "holiday" },
+            { date: "2026-01-07", title: "校慶預備日", type: "activity" },
+            { date: "2026-01-08", title: "校慶預備日", type: "activity" },
+            { date: "2026-01-09", title: "三十周年校慶典禮暨開放日", type: "ceremony" },
+            { date: "2026-01-11", title: "三十周年校慶開放日", type: "activity" },
+            { date: "2026-01-12", title: "自主學習日", type: "activity" },
+            { date: "2026-01-17", title: "中一新生面試班", type: "activity" },
+            { date: "2026-01-26", title: "第一次中一至中五級考試開始", type: "exam" },
+            { date: "2026-01-26", title: "第二次中六級模擬考試開始", type: "exam" },
+
+            // 2026年2月
+            { date: "2026-02-02", title: "東華三院聯校專業發展日", type: "activity" },
+            { date: "2026-02-06", title: "考試/模擬考試結束", type: "exam" },
+            { date: "2026-02-07", title: "中一自行分配學位面試日 / 補考日", type: "exam" },
+            { date: "2026-02-16", title: "農曆新年假期開始", type: "holiday" },
+            { date: "2026-02-17", title: "農曆年初一", type: "holiday" },
+            { date: "2026-02-21", title: "2026-2027年度第一次校務會議", type: "meeting" },
+            { date: "2026-02-24", title: "中一新生家長日", type: "meeting" },
+            { date: "2026-02-24", title: "全日APL健康護理實務開始", type: "activity" },
+            { date: "2026-02-28", title: "農曆新年假期結束", type: "holiday" },
+            { date: "2026-02-28", title: "APL健康護理實務考試", type: "exam" },
+
+            // 其餘月份的事件資料可以繼續添加...
+        ];
+
+        // 初始化日曆
+        function initCalendar() {
+            let currentDate = new Date(2025, 8, 1); // 2025年9月開始
+            const daysGrid = document.getElementById('days-grid');
+            const currentMonthElement = document.getElementById('current-month');
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            const yearButtons = document.querySelectorAll('.year-btn');
+            const modal = document.getElementById('event-modal');
+
+            // 渲染月曆
+            function renderCalendar(date) {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                
+                // 更新當前月份顯示
+                currentMonthElement.textContent = `${year}年${month + 1}月`;
+                
+                // 清空網格
+                daysGrid.innerHTML = '';
+                
+                // 獲取月份的第一天和最後一天
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                
+                // 獲取第一天是星期幾 (0 = 星期日, 6 = 星期六)
+                const firstDayIndex = firstDay.getDay();
+                
+                // 獲取上個月的最後幾天
+                const prevMonthLastDay = new Date(year, month, 0).getDate();
+                
+                // 填充上個月的日期
+                for (let i = firstDayIndex; i > 0; i--) {
+                    const day = prevMonthLastDay - i + 1;
+                    const dayElement = createDayElement(year, month - 1, day, true);
+                    daysGrid.appendChild(dayElement);
+                }
+                
+                // 填充當月的日期
+                for (let day = 1; day <= lastDay.getDate(); day++) {
+                    const dayElement = createDayElement(year, month, day, false);
+                    daysGrid.appendChild(dayElement);
+                }
+                
+                // 計算需要填充的下個月日期數量
+                const totalCells = 42; // 6行7列
+                const remainingCells = totalCells - (firstDayIndex + lastDay.getDate());
+                
+                // 填充下個月的日期
+                for (let day = 1; day <= remainingCells; day++) {
+                    const dayElement = createDayElement(year, month + 1, day, true);
+                    daysGrid.appendChild(dayElement);
+                }
+            }
+            
+            // 創建日期元素
+            function createDayElement(year, month, day, isOtherMonth) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEvents = eventsData.filter(event => event.date === dateStr);
+                const isToday = isTodayDate(year, month, day);
+                
+                const dayElement = document.createElement('div');
+                let dayClass = 'calendar-day';
+                if (isOtherMonth) dayClass += ' other-month';
+                if (isToday) dayClass += ' today';
+                if (dayEvents.length > 0) dayClass += ' has-events';
+                
+                dayElement.className = dayClass;
+                
+                dayElement.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    <div class="day-events">
+                        ${dayEvents.slice(0, 2).map(event => 
+                            `<div class="event-item event-${event.type}">${event.title}</div>`
+                        ).join('')}
+                        ${dayEvents.length > 2 ? `<div class="event-item">+${dayEvents.length - 2}更多</div>` : ''}
+                    </div>
+                `;
+                
+                if (dayEvents.length > 0) {
+                    dayElement.addEventListener('click', () => showEventModal(dateStr, dayEvents));
+                }
+                
+                return dayElement;
+            }
+            
+            // 檢查是否是今天
+            function isTodayDate(year, month, day) {
+                const today = new Date();
+                return today.getFullYear() === year &&
+                       today.getMonth() === month &&
+                       today.getDate() === day;
+            }
+            
+            // 顯示事件模態框
+            function showEventModal(dateStr, events) {
+                const modalDate = document.getElementById('modal-date');
+                const modalEvents = document.getElementById('modal-events');
+                
+                const dateObj = new Date(dateStr);
+                const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+                const formattedDate = dateObj.toLocaleDateString('zh-TW', options);
+                
+                modalDate.textContent = formattedDate;
+                modalEvents.innerHTML = events.map(event => `
+                    <div class="event-detail event-${event.type}">
+                        <h3>${event.title}</h3>
+                        <p>類型: ${getEventTypeName(event.type)}</p>
+                    </div>
+                `).join('');
+                
+                modal.style.display = 'flex';
+            }
+            
+            // 獲取事件類型名稱
+            function getEventTypeName(type) {
+                const typeNames = {
+                    'exam': '考試測驗',
+                    'activity': '活動項目',
+                    'holiday': '假期節日',
+                    'ceremony': '典禮儀式',
+                    'meeting': '會議講座'
+                };
+                return typeNames[type] || '活動';
+            }
+            
+            // 關閉模態框
+            function closeModal() {
+                modal.style.display = 'none';
+            }
+            
+            // 事件綁定
+            prevMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar(currentDate);
+            });
+            
+            nextMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar(currentDate);
+            });
+            
+            yearButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const year = parseInt(button.dataset.year);
+                    currentDate = new Date(year, 8, 1); // 設置到該年的9月
+                    
+                    yearButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    renderCalendar(currentDate);
+                });
+            });
+            
+            // 關閉模態框事件
+            document.querySelector('.close-modal').addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+            
+            // 初始渲染
+            renderCalendar(currentDate);
+        }
+
+        // 當頁面載入完成時初始化日曆
+        document.addEventListener('DOMContentLoaded', initCalendar);
+    </script>
+</body>
+<script>
+// 檢查登入狀態
+function checkAuth() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!isLoggedIn || !authToken) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    
+    try {
+        // 驗證token是否有效
+        const tokenData = JSON.parse(atob(authToken));
+        const currentTime = Date.now();
+        const tokenAge = currentTime - tokenData.timestamp;
+        
+        // Token有效期24小時
+        if (tokenAge > 24 * 60 * 60 * 1000) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userRole');
+        window.location.href = 'login.html';
+        return false;
+    }
+}
+
+// 頁面載入時檢查權限
+if (!checkAuth()) {
+    // 如果未登入，會自動跳轉到登入頁面
+}
+
+// 顯示當前用戶
+    function displayCurrentUser() {
+        const userRole = localStorage.getItem('userRole');
+        if (userRole) {
+            // 在導航欄顯示用戶信息
+            const userInfo = document.createElement('li');
+            userInfo.innerHTML = `<span style="color: #e8491d;">歡迎, ${userRole}</span>`;
+            
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.appendChild(userInfo);
+        }
+    }
+
+    // 頁面載入時顯示用戶
+    document.addEventListener('DOMContentLoaded', function() {
+        displayCurrentUser();
+        
+        // 定期檢查登入狀態（每5分鐘）
+        setInterval(checkAuth, 5 * 60 * 1000);
+    });
+    </script>
+</script>
+</html>
