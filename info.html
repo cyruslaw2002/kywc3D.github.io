@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學校資訊 - KYWC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 基本樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 導航欄樣式 - 與主站一致 */
+        nav {
+            background: #35424a;
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: #e8491d;
+        }
+        
+        .nav-links {
+            list-style: none;
+            display: flex;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .nav-links a:hover {
+            color: #e8491d;
+        }
+        
+        /* 頁面標頭 */
+        .page-header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .page-intro {
+            text-align: center;
+            padding: 2rem 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* 卡片樣式 */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            padding: 1rem;
+            background: #35424a;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* 學校基本信息 */
+        .school-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 1rem;
+        }
+        
+        .info-icon {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        /* 新聞動態 */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .news-item {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .news-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .news-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .news-content {
+            padding: 1rem;
+        }
+        
+        .news-date {
+            color: #667eea;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* 校園設施 */
+        .facilities {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .facility-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .facility-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .facility-icon {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        /* 時間軸 */
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #667eea;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+        }
+        
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border: 4px solid #667eea;
+            border-radius: 50%;
+            top: 15px;
+            right: -13px;
+            z-index: 1;
+        }
+        
+        .left {
+            left: 0;
+            text-align: right;
+        }
+        
+        .right {
+            left: 50%;
+        }
+        
+        .right::after {
+            left: -13px;
+        }
+        
+        .timeline-content {
+            padding: 1rem;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* 聯絡資訊 */
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .contact-icon {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-links li {
+                margin: 0;
+            }
+            
+            .timeline::after {
+                left: 31px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .timeline-item::after {
+                left: 21px;
+            }
+            
+            .left, .right {
+                left: 0;
+                text-align: left;
+            }
+            
+            .school-info, .news-grid, .facilities, .contact-info {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 頁尾樣式 */
+        footer {
+            background: #35424a;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #e8491d;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+        }
+        
+        /* 分割線 */
+        .divider {
+            height: 3px;
+            background: linear-gradient(to right, transparent, #667eea, transparent);
+            margin: 2rem 0;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav>
+        <div class="container">
+            <div class="logo"><i class="fas fa-school"></i>KYWC中學</div>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i>回首頁</a></li>
+                <li id="user-info"></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 頁面標頭 -->
+    <header class="page-header">
+        <div class="container">
+            <h1>東華三院郭一葦中學</h1>
+            <p>卓越教育，塑造未來</p>
+        </div>
+    </header>
+
+    <!-- 頁面介紹 -->
+    <section class="page-intro">
+        <div class="container">
+            <h2>關於我們學校</h2>
+            <p>位於元朗區，是一所政府資助中學，創立於1995年，沒有宗教背景，毋須繳付學費。學校實行中文教學，提供完整的初中及高中課程，並設有中一自行分配學位申請。在師資方面，學校教師擁有豐富的學歷和年資。 </p>
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- 學校基本信息 -->
+        <div class="card">
+            <div class="card-header">
+            <i class="fas fa-university"></i>
+            <h3>學校基本信息</h3>
+            </div>
+            <div class="card-body">
+            <div class="school-info">
+                <div>
+                <div class="info-item">
+                    <div class="info-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                    <h4>所屬地區</h4>
+                    <p>元朗區</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                    <h4>創立年份</h4>
+                    <p>1995年</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                    <i class="fas fa-church"></i>
+                    </div>
+                    <div>
+                    <h4>宗教背景</h4>
+                    <p>無</p>
+                    </div>
+                </div>
+                </div>
+                <div>
+                <div class="info-item">
+                    <div class="info-icon">
+                    <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                    <h4>學生人數</h4>
+                    <p>約730名學生</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div>
+                    <h4>教師人數</h4>
+                    <p>74位專任教師</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                    <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div>
+                    <h4>校長</h4>
+                    <p>文可為先生</p>
+                    </div>
+                </div>
+                </div>
+                <div>
+                <div class="info-item">
+                    <div class="info-icon">
+                    <i class="fas fa-building"></i>
+                    </div>
+                    <div>
+                    <h4>辦學團體</h4>
+                    <p>東華三院</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                    <h4>學校類別</h4>
+                    <p>資助中學</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                    <i class="fas fa-phone"></i>
+                    </div>
+                    <div>
+                    <h4>聯絡電話</h4>
+                    <p>(852) 2447-1258</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- 最新消息 -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-newspaper"></i>
+                <h3>最新消息</h3>
+            </div>
+            <div class="card-body">
+                <div class="news-grid">
+                    <div class="news-item">
+                        <div class="news-content">
+                            <div class="news-date"><i class="fas fa-sitemap"></i> 行政架構圖</div>
+                            <p>查看本校最新行政架構分組，了解各部門職責。</p>
+                            <a href="files/行政架構圖2526_組別分類_0829_V6.pdf" class="btn-download" download style="background:#667eea;color:#fff;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;">
+                                <i class="fas fa-download"></i> 下載
+                            </a>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-content">
+                            <div class="news-date"><i class="fas fa-file-download"></i> 行政架構總表</div>
+                            <p>詳細列出各行政組別及主要職責分工。</p>
+                            <a href="files/Main Duties 2526_250829- V6.pdf" class="btn-download" download style="background:#e8491d;color:#fff;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;">
+                                <i class="fas fa-download"></i> 下載
+                            </a>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-content">
+                            <div class="news-date"><i class="fas fa-map"></i> 特別室及課室分佈圖</div>
+                            <p>快速查閱校內各特別室及課室位置分佈。</p>
+                            <a href="files/2025-2026特別室及課室分佈圖.pdf" class="btn-download" download style="background:#764ba2;color:#fff;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;">
+                                <i class="fas fa-download"></i> 下載
+                            </a>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-content">
+                            <div class="news-date"><i class="fas fa-user-friends"></i> 班主任名單</div>
+                            <p>查閱最新班主任分配，方便聯絡及溝通。</p>
+                            <a href="files/2025-2026班主任名單.pdf" class="btn-download" download style="background:#35424a;color:#fff;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;">
+                                <i class="fas fa-download"></i> 下載
+                            </a>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-content">
+                            <div class="news-date"><i class="fas fa-calendar"></i> 校曆表</div>
+                            <p>掌握本年度校曆及重要活動日期。</p>
+                            <a href="files/2526_Xiao_Li_Biao_student_version-revised_version.pdf" class="btn-download" download style="background:#21b573;color:#fff;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;">
+                                <i class="fas fa-download"></i> 下載
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- 校園設施 -->
+        <div class="card">
+            <div class="card-header">
+            <i class="fas fa-building"></i>
+            <h3>校園設施</h3>
+            </div>
+            <div class="card-body">
+            <div class="facilities">
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-church"></i>
+                </div>
+                <h4>禮堂</h4>
+                <p>舉辦大型活動及集會的多功能空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-landmark"></i>
+                </div>
+                <h4>校史館</h4>
+                <p>展示學校發展歷程及重要紀錄</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-music"></i>
+                </div>
+                <h4>音樂室</h4>
+                <p>配備完善樂器，供學生音樂學習及練習</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4>學生活動室</h4>
+                <p>學生社團及活動的專屬空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-paint-brush"></i>
+                </div>
+                <h4>視覺藝術室</h4>
+                <p>提供繪畫、設計及創作的藝術空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h4>圖書館</h4>
+                <p>藏書超過3萬冊，提供安靜的閱讀空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <h4>電腦學習室</h4>
+                <p>最新電腦設備與高速網路連接</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h4>STEAM實驗室</h4>
+                <p>跨學科創新學習及實驗空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h4>食物科技室</h4>
+                <p>烹飪及食物科學教學專用教室</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <h4>商科學習中心</h4>
+                <p>商業知識與技能培訓空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-tv"></i>
+                </div>
+                <h4>校園電視台</h4>
+                <p>學生媒體製作及播報平台</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <h4>科學實驗室</h4>
+                <p>設備齊全的物理、化學、生物實驗室</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <h4>電腦輔助學習室</h4>
+                <p>結合科技輔助教學的專用空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-language"></i>
+                </div>
+                <h4>英語自學中心</h4>
+                <p>提升英語能力的自學資源中心</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-coffee"></i>
+                </div>
+                <h4>英語茶座</h4>
+                <p>輕鬆交流英語的休閒空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <h4>悅學軒</h4>
+                <p>促進學生身心健康的活動空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-hands-helping"></i>
+                </div>
+                <h4>家教會資源中心</h4>
+                <p>家長與學校交流及資源共享平台</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <h4>體適能訓練中心</h4>
+                <p>專業健身及體能訓練設施</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-globe-asia"></i>
+                </div>
+                <h4>人文教育中心</h4>
+                <p>推動人文素養及多元文化教育</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-user-friends"></i>
+                </div>
+                <h4>學生會室</h4>
+                <p>學生自治及活動策劃空間</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-umbrella"></i>
+                </div>
+                <h4>空調有蓋操場</h4>
+                <p>近年增設，提供舒適的運動及集會環境</p>
+                </div>
+                <div class="facility-item">
+                <div class="facility-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h4>學生飯堂</h4>
+                <p>近年增設，供應多元健康餐飲</p>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- 學校歷史 -->
+        <div class="card">
+            <div class="card-header">
+            <i class="fas fa-history"></i>
+            <h3>學校歷史</h3>
+            </div>
+            <div class="card-body">
+            <div class="timeline">
+            <div class="timeline-item left">
+            <div class="timeline-content">
+                <h4>2020年</h4>
+                <p>優化校本課程，初中加入STEAM及食物科技課程，提供多元選修及應用學習課程，協助學生生涯規劃。</p>
+            </div>
+            </div>
+            <div class="timeline-item right">
+            <div class="timeline-content">
+                <h4>2020/21學年</h4>
+                <p>裝設空調及玻璃屏幕雨天操場，設置「智慧教室」及增設STEM、食物科技、商科等專科教室，深化電子學習及多元教學策略。</p>
+            </div>
+            </div>
+            <div class="timeline-item left">
+            <div class="timeline-content">
+                <h4>2019/20學年</h4>
+                <p>推出「自攜裝置 BYOD」計劃，促進學生自主學習與電子學習。</p>
+            </div>
+            </div>
+            <div class="timeline-item right">
+            <div class="timeline-content">
+                <h4>2016/17學年</h4>
+                <p>積極推動國際交流，與多地學校結盟，拓展學生世界視野。</p>
+            </div>
+            </div>
+            <div class="timeline-item left">
+            <div class="timeline-content">
+                <h4>2014/15學年</h4>
+                <p>引進「自主學習」計劃，提升學生學習效能及培養學習興趣。</p>
+            </div>
+            </div>
+            <div class="timeline-item right">
+            <div class="timeline-content">
+                <h4>2010/11學年</h4>
+                <p>開設體適能訓練中心及英語研習中心，優化校園設施。</p>
+            </div>
+            </div>
+            <!-- (移除重複的 timeline-item left) -->
+            </div>
+
+        <hr class="divider">
+
+    <div class="back-to-top" id="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+     <footer>
+        <div class="container">
+            <p>&copy; 2025 KYWC中學。版權所有。</p>
+        </div>
+    </footer>
+
+    <script>
+     // 返回顶部功能
+        function initBackToTop() {
+            const backToTopBtn = document.getElementById('back-to-top');
+            
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+            
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+            // 檢查登入狀態
+function checkAuth() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!isLoggedIn || !authToken) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    
+    try {
+        // 驗證token是否有效
+        const tokenData = JSON.parse(atob(authToken));
+        const currentTime = Date.now();
+        const tokenAge = currentTime - tokenData.timestamp;
+        
+        // Token有效期24小時
+        if (tokenAge > 24 * 60 * 60 * 1000) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userRole');
+        window.location.href = 'login.html';
+        return false;
+    }
+}
+
+// 頁面載入時檢查權限
+if (!checkAuth()) {
+    // 如果未登入，會自動跳轉到登入頁面
+}
+
+// 顯示當前用戶
+    function displayCurrentUser() {
+        const userRole = localStorage.getItem('userRole');
+        if (userRole) {
+            // 在導航欄顯示用戶信息
+            const userInfo = document.createElement('li');
+            userInfo.innerHTML = `<span style="color: #e8491d;">歡迎, ${userRole}</span>`;
+            
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.appendChild(userInfo);
+        }
+    }
+
+    // 頁面載入時顯示用戶
+    document.addEventListener('DOMContentLoaded', function() {
+        displayCurrentUser();
+        
+        // 定期檢查登入狀態（每5分鐘）
+        setInterval(checkAuth, 5 * 60 * 1000);
+    });
+</script>
+</body>
+</html>
