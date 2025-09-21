@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>關於我們 KYWC_3D</title>
+    <style>
+        /* 共用樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 導航欄樣式 */
+        nav {
+            background: #35424a;
+            color: white;
+            padding: 1rem 0;
+        }
+        
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            list-style: none;
+            display: flex;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #e8491d;
+        }
+        
+        /* 頁面標頭 */
+        .page-header {
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .page-header p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+        
+        /* 班級介紹 */
+        .class-intro {
+            padding: 4rem 0;
+            background: white;
+        }
+        
+        .intro-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+        
+        .intro-text h2 {
+            font-size: 2.5rem;
+            color: #35424a;
+            margin-bottom: 1.5rem;
+        }
+        
+        .intro-text p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+        
+        .class-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        /* 老師介紹 */
+        .teachers-section {
+            padding: 4rem 0;
+            background: #f8f9fa;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #35424a;
+            margin-bottom: 3rem;
+        }
+        
+        .teachers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .teacher-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .teacher-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .teacher-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .teacher-name {
+            font-size: 1.5rem;
+            color: #35424a;
+            margin-bottom: 0.5rem;
+        }
+        
+        .teacher-subject {
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        
+        .teacher-bio {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* 班級特色 */
+        .features-section {
+            padding: 4rem 0;
+            background: white;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .feature-card:hover .feature-icon,
+        .feature-card:hover .feature-title,
+        .feature-card:hover .feature-desc {
+            color: white;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            color: #35424a;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .feature-desc {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* 班級相冊預覽 */
+        .gallery-preview {
+            padding: 4rem 0;
+            background: #f8f9fa;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .gallery-item {
+            height: 200px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        /* 聯絡資訊 */
+        .contact-section {
+            padding: 4rem 0;
+            background: white;
+        }
+        
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+        
+        .contact-item {
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .contact-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .contact-icon {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-title {
+            font-size: 1.2rem;
+            color: #35424a;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .contact-detail {
+            color: #666;
+        }
+        
+        /* 動畫效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-item {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .animate-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .intro-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .class-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .intro-text h2 {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+            }
+            
+            .nav-links li {
+                margin: 0.5rem 0;
+            }
+        }
+        
+        /* 頁尾樣式 */
+        footer {
+            background: #35424a;
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 3rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            text-align: left;
+        }
+        
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links h4 {
+            margin-bottom: 1rem;
+            color: #e8491d;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #e8491d;
+        }
+        
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav>
+        <div class="container">
+            <div class="logo">關於班級</div>
+            <ul class="nav-links">
+                <li><a href="index.html">回首頁</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 頁面標頭 -->
+    <header class="page-header">
+        <div class="container">
+            <h1>關於KYWC_3D</h1>
+            <p>一個充滿活力、溫馨與學習熱情的大家庭</p>
+        </div>
+    </header>
+
+    <!-- 班級介紹 -->
+    <section class="class-intro">
+        <div class="container">
+            <div class="intro-content">
+                <div class="intro-text animate-item">
+                    <h2>我們的班級故事</h2>
+                    <p>3D班，是一個由32位充滿活力的學生組成的溫暖大家庭。我們相信每個學生都是獨特的個體，擁有無限的潛能和創造力。</p>
+                    <p>在過去的三年裡，我們一起學習、一起成長，創造了無數美好的回憶。從課堂上的認真學習到課外的豐富活動，我們始終秉持著「團結、進取、創新、感恩」的班級精神。</p>
+                    <p>我們不僅注重學業成績，更重視品德的培養和全面發展。在這個溫馨的集體中，每個人都能找到屬於自己的舞台，展現獨特的才華。</p>
+                    
+                    <div class="class-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">32</div>
+                            <div class="stat-label">位學生</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">多</div>
+                            <div class="stat-label">位科任老師</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">多</div>
+                            <div class="stat-label">年歷史</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="intro-image animate-item">
+                    <img src="images\events\未命名設計 (2).png" alt="班級合照" style="width:100%; border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 老師介紹 -->
+    <section class="teachers-section">
+        <div class="container">
+            <h2 class="section-title">我們的班主任</h2>
+            <div class="teachers-grid">
+                <div class="teacher-card animate-item">
+                    <div class="teacher-avatar">吳</div>
+                    <h3 class="teacher-name">吳凱翎老師</h3>
+                    <div class="teacher-subject">英文老師 / 歷史老師</div>
+                    <p class="teacher-bio">擁有多年教學經驗，耐心細緻，深受學生愛戴。相信每個孩子都能發光發熱。</p>
+                </div>
+                
+                <div class="teacher-card animate-item">
+                    <div class="teacher-avatar">黃</div>
+                    <h3 class="teacher-name">黃勁權老師</h3>
+                    <div class="teacher-subject">數學老師</div>
+                    <p class="teacher-bio">擁有多年教學經驗，教學風格生動有趣，善於引導學生思考，讓數學變得不再困難。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 班級特色 -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">班級特色</h2>
+            <div class="features-grid">
+                <div class="feature-card animate-item">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">多元學習</h3>
+                    <p class="feature-desc">我們提供豐富的課程和活動，讓學生在學術、藝術、體育等各個領域全面發展。</p>
+                </div>
+                
+                <div class="feature-card animate-item">
+                    <div class="feature-icon">🤝</div>
+                    <h3 class="feature-title">團隊合作</h3>
+                    <p class="feature-desc">通過小組项目和班級活動，培養學生的團隊協作能力和領導才能。</p>
+                </div>
+                
+                <div class="feature-card animate-item">
+                    <div class="feature-icon">💡</div>
+                    <h3 class="feature-title">創新思維</h3>
+                    <p class="feature-desc">鼓勵學生大膽創新，培養批判性思維和解決問題的能力。</p>
+                </div>
+                
+                <div class="feature-card animate-item">
+                    <div class="feature-icon">❤️</div>
+                    <h3 class="feature-title">關懷支持</h3>
+                    <p class="feature-desc">建立溫馨的班級氛圍，讓每個學生感受到關愛和支持，健康成長。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 班級相冊預覽 -->
+    <section class="gallery-preview">
+        <div class="container">
+            <h2 class="section-title">精彩瞬間</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item animate-item">
+                    <img src="images\gallery\環校跑 2024\環校跑 2024 (2).jpg" alt="#">
+                </div>
+                <div class="gallery-item animate-item">
+                    <img src="images\V-Star 長者探訪\V-Star 長者探訪 (1).jpeg" alt="#">
+                </div>
+                <div class="gallery-item animate-item">
+                    <img src="images\V-Star 沙頭角\V-star 沙頭角 (4).jpeg" alt="#">
+                </div>
+                <div class="gallery-item animate-item">
+                    <img src="images\參觀香港文化博物館\參觀香港文化博物館 (6).jpeg" alt="#">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 聯絡資訊 -->
+    <section class="contact-section">
+        <div class="container">
+            <h2 class="section-title">聯絡我們</h2>
+            <div class="contact-info">
+                <div class="contact-item animate-item">
+                    <div class="contact-icon">📧</div>
+                    <h3 class="contact-title">電子郵件</h3>
+                    <p class="contact-detail">office@twghkywc.edu.hk</p>
+                </div>
+                
+                <div class="contact-item animate-item">
+                    <div class="contact-icon">📞</div>
+                    <h3 class="contact-title">電話</h3>
+                    <p class="contact-detail">(852) 2447-1258</p>
+                </div>
+                
+                <div class="contact-item animate-item">
+                    <div class="contact-icon">🏫</div>
+                    <h3 class="contact-title">地址</h3>
+                    <p class="contact-detail">新界元朗天水圍聚星路三號</p>
+                </div>
+                
+                <div class="contact-item animate-item">
+                    <div class="contact-icon">🕒</div>
+                    <h3 class="contact-title">辦公時間</h3>
+                    <p class="contact-detail">週一至週五 8:00-18:00</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- 學校位置地圖 -->
+    <section class="map-section">
+        <div class="container">
+            <h2 class="section-title">學校位置</h2>
+            <div style="width:100%;height:400px;border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.1);">
+                <iframe
+                    src="https://www.google.com/maps?q=香港元朗天水圍聚星路三號&output=embed"
+                    width="100%"
+                    height="100%"
+                    style="border:0;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">3D班</div>
+                    <p>一個充滿愛與學習的大家庭</p>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>快速連結</h4>
+                    <ul>
+                        <li><a href="index.html">網站首頁</a></li>
+                        <li><a href="gallery.html">班級相册</a></li>
+                        <li><a href="resources.html">學習資源</a></li>
+                        <li><a href="calendar.html">班級日曆</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>相關資源</h4>
+                    <ul>
+                        <li><a href="https://www.twghkywc.edu.hk">學校官網</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025-2026 3D班. 保留所有權利。 | 設計與開發：3D網頁小組admin</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 滾動動畫效果
+        function checkAnimation() {
+            const elements = document.querySelectorAll('.animate-item');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        // 初始檢查和滾動監聽
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAnimation();
+            window.addEventListener('scroll', checkAnimation);
+        });
+
+        // 導航欄激活狀態
+        const currentPage = window.location.pathname.split('/').pop();
+        const navLinks = document.querySelectorAll('.nav-links a');
+        
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+</body>
+<script>
+// 檢查登入狀態
+function checkAuth() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!isLoggedIn || !authToken) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    
+    try {
+        // 驗證token是否有效
+        const tokenData = JSON.parse(atob(authToken));
+        const currentTime = Date.now();
+        const tokenAge = currentTime - tokenData.timestamp;
+        
+        // Token有效期24小時
+        if (tokenAge > 24 * 60 * 60 * 1000) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userRole');
+        window.location.href = 'login.html';
+        return false;
+    }
+}
+
+// 頁面載入時檢查權限
+if (!checkAuth()) {
+    // 如果未登入，會自動跳轉到登入頁面
+}
+
+// 顯示當前用戶
+    function displayCurrentUser() {
+        const userRole = localStorage.getItem('userRole');
+        if (userRole) {
+            // 在導航欄顯示用戶信息
+            const userInfo = document.createElement('li');
+            userInfo.innerHTML = `<span style="color: #e8491d;">歡迎, ${userRole}</span>`;
+            
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.appendChild(userInfo);
+        }
+    }
+
+    // 頁面載入時顯示用戶
+    document.addEventListener('DOMContentLoaded', function() {
+        displayCurrentUser();
+        
+        // 定期檢查登入狀態（每5分鐘）
+        setInterval(checkAuth, 5 * 60 * 1000);
+    });
+    </script>
+</script>
+</html>
