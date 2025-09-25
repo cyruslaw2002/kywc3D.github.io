@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KYWC_3D班網</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <like rel="icon" href="images\icons\icon.png" sizes="16x16" type="image/png">
+    <link rel="icon" href="images/icons/icon.png" sizes="16x16" type="image/png">
     <style>
         /* 全局样式 */
         * {
@@ -30,6 +30,8 @@
             background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
+            font-size: 16px; /* 防止手機自動縮放 */
+            overflow-x: hidden; /* 防止橫向滾動 */
         }
         
         .container {
@@ -40,10 +42,10 @@
         }
         
         /* 导航栏样式 */
-        header {
+       header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 15px 0;
+            padding: 12px 0;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -54,44 +56,77 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+            flex-wrap: wrap;
         }
         
         .logo {
             display: flex;
             align-items: center;
+            flex-shrink: 0;
+            min-width: 0; /* 允許內容縮小 */
         }
         
         .logo img {
-            height: 50px;
-            margin-right: 10px;
+            height: 45px;
+            margin-right: 8px;
+            max-width: 100%;
+            flex-shrink: 0;
         }
         
         .logo h1 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
         }
         
         nav ul {
             display: flex;
             list-style: none;
+            flex-wrap: nowrap;
+            align-items: center;
+            margin: 0;
+            padding: 0;
         }
         
         nav ul li {
-            margin-left: 20px;
+            margin-left: 12px;
+            white-space: nowrap;
         }
         
         nav ul li a {
             color: white;
             text-decoration: none;
             font-weight: 500;
-            padding: 5px 10px;
+            padding: 8px 12px;
             border-radius: 4px;
             transition: background-color 0.3s;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            white-space: nowrap;
         }
         
         nav ul li a:hover, 
         nav ul li a.active {
             background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 漢堡菜單按鈕 */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            min-height: 44px; /* 最小觸摸目標大小 */
         }
         
         /* 横幅样式 */
@@ -163,6 +198,7 @@
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s;
+            max-width: 100%; /* 圖片響應式 */
         }
         
         .feature-card:hover .feature-img img {
@@ -192,6 +228,11 @@
             text-decoration: none;
             font-weight: 500;
             transition: background-color 0.3s;
+            min-height: 44px; /* 最小觸摸目標大小 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
         
         .btn:hover {
@@ -210,6 +251,7 @@
         .announcement-item {
             padding: 15px 0;
             border-bottom: 1px solid #eee;
+            cursor: pointer;
         }
         
         .announcement-item:last-child {
@@ -302,6 +344,11 @@
             display: inline-block;
             margin-right: 15px;
             font-size: 1.2rem;
+            min-height: 44px; /* 最小觸摸目標大小 */
+            width: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .copyright {
@@ -312,34 +359,153 @@
             color: rgba(255, 255, 255, 0.6);
         }
         
-        /* 响应式设计 */
+        /* 響應式設計 - 手機優化 */
         @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                text-align: center;
+            .container {
+                padding: 0 10px;
             }
             
-            nav ul {
-                margin-top: 15px;
+            .header-content {
                 flex-wrap: wrap;
-                justify-content: center;
+            }
+            
+            .logo {
+                flex: 1;
+            }
+            
+            .logo h1 {
+                font-size: 1.3rem;
+            }
+            
+            .logo img {
+                height: 40px;
+            }
+            
+            /* 漢堡菜單顯示 */
+            .menu-toggle {
+                display: block;
+            }
+            
+            /* 導航菜單改為垂直佈局 */
+            nav ul {
+                flex-direction: column;
+                width: 100%;
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+                z-index: 1001;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+            .menu {
+                display: flex;
+                flex-wrap: nowrap; /* 禁止換行 */
+                justify-content: space-around;
+            }
+            
+            nav ul.show {
+                display: flex;
             }
             
             nav ul li {
-                margin: 5px 10px;
+                margin: 0;
+                width: 100%;
+                text-align: center;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
             
+            nav ul li a {
+                display: block;
+                padding: 15px;
+                font-size: 1.1rem;
+                justify-content: center;
+            }
+            
+            /* 橫幅優化 */
             .banner {
-                height: 300px;
+                height: 250px;
+                margin-bottom: 20px;
             }
             
             .banner-content h2 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                margin-bottom: 10px;
             }
             
             .banner-content p {
                 font-size: 1rem;
+                padding: 0 15px;
             }
+            
+            /* 功能卡片改為單列 */
+            .features {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .feature-card {
+                margin-bottom: 15px;
+            }
+            
+            /* 快速鏈接改為單列 */
+            .quick-links {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            /* 調整字體大小 */
+            h2.section-title {
+                font-size: 1.5rem;
+            }
+            
+            /* 公告區域優化 */
+            .announcements {
+                padding: 15px;
+            }
+            
+            .announcement-item {
+                padding: 12px 0;
+            }
+            
+            /* 頁腳優化 */
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .footer-section {
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* 針對非常小的屏幕進一步優化 */
+        @media (max-width: 480px) {
+            .banner {
+                height: 200px;
+            }
+            
+            .banner-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            .logo h1 {
+                font-size: 1.1rem;
+            }
+            
+            h2.section-title {
+                font-size: 1.3rem;
+            }
+            
+            .feature-content, .quick-link-card, .announcements {
+                padding: 15px;
+            }
+        }
+        
+        /* 圖片響應式適配 */
+        img {
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>
@@ -351,6 +517,9 @@
                 <img src="https://twghkywc.edu.hk/sites/all/themes/ntemplate/images/web/sch_logo.png" alt="班级logo">
                 <h1>KYWC_3D班網</h1>
             </div>
+            <button class="menu-toggle" aria-label="導航菜單">
+                <i class="fas fa-bars"></i>
+            </button>
             <nav>
                 <ul>
                     <li><a href="#" class="active"><i class="fas fa-home"></i> 首页</a></li>
@@ -359,8 +528,8 @@
                     <li><a href="gallery.html"><i class="fas fa-camera"></i> 班级風采</a></li>
                     <li><a href="about.html"><i class="fas fa-users"></i> 關於我們</a></li>
                     <li><a href="calendar.html"><i class="fas fa-calendar"></i> 班级日曆</a></li>
-                    <li><a href="info.html" class="active"><i class="fas fa-info-circle"></i> 學校資訊</a></li>
-                    <li><a href="#" id="logout-btn">登出</a></li>
+                    <li><a href="info.html"><i class="fas fa-info-circle"></i> 學校資訊</a></li>
+                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> 登出</a></li>
                 </ul>
             </nav>
         </div>
@@ -447,12 +616,12 @@
         <div class="features">
             <div class="feature-card">
                 <div class="feature-img">
-                    <img src="/images/banner.png" alt="班级活动">
+                    <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="班级活动">
                 </div>
                 <div class="feature-content">
                     <h3>3D壁報設計</h3>
                     <p>承夢前行創輝煌繼往開來展未來，30週年校慶共築夢想之路。</p>
-                    <a href="/images/banner.png" class="btn">查看更多</a>
+                    <a href="#" class="btn">查看更多</a>
                 </div>
             </div>
             <div class="feature-card">
@@ -493,17 +662,17 @@
                     <a href="gallery.html">班级風采</a>
                     <a href="about.html">關於我們</a>
                     <a href="calendar.html">班级日曆</a>
+                    <a href="info.html">學校資訊</a>
                 </div>
                 <div class="footer-section">
                     <h3>联系admin</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> 地址: 	
-新界元朗天水圍聚星路三號</p>
+                    <p><i class="fas fa-map-marker-alt"></i> 地址: 新界元朗天水圍聚星路三號</p>
                     <p><i class="fas fa-phone"></i> 電話: (852)9268-3237</p>
                     <p><i class="fas fa-envelope"></i> 電郵: cyruslaw1001@gmail.com</p>
                     <div class="social-links">
-                        <a href="https://www.instagram.com/xiluozhuo?igsh=YTU1dTF3NWNndnc0"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://wa.me/92683237"><i class="fab fa-whatsapp"></i></a>
-                        <a href="https://www.facebook.com/share/1Eeu5yScBW/"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/xiluozhuo?igsh=YTU1dTF3NWNndnc0" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://wa.me/92683237" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.facebook.com/share/1Eeu5yScBW/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                     </div>
                 </div>
             </div>
@@ -514,10 +683,44 @@
     </footer>
 
     <script>
-        // 简单的交互效果
+        // 漢堡菜單功能
         document.addEventListener('DOMContentLoaded', function() {
-            // 导航菜单激活状态
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navUl = document.querySelector('nav ul');
+            
+            // 漢堡菜單點擊事件
+            menuToggle.addEventListener('click', function() {
+                navUl.classList.toggle('show');
+                
+                // 切換圖標
+                const icon = this.querySelector('i');
+                if (navUl.classList.contains('show')) {
+                    icon.className = 'fas fa-times';
+                } else {
+                    icon.className = 'fas fa-bars';
+                }
+            });
+            
+            // 點擊菜單項後關閉菜單（手機端）
             const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        navUl.classList.remove('show');
+                        menuToggle.querySelector('i').className = 'fas fa-bars';
+                    }
+                });
+            });
+            
+            // 窗口大小改變時重置菜單狀態
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    navUl.classList.remove('show');
+                    menuToggle.querySelector('i').className = 'fas fa-bars';
+                }
+            });
+            
+            // 導航菜單激活狀態
             navLinks.forEach(link => {
                 link.addEventListener('click', function() {
                     navLinks.forEach(l => l.classList.remove('active'));
@@ -525,7 +728,7 @@
                 });
             });
             
-            // 模拟公告更多功能
+            // 公告點擊展開功能
             const announcementItems = document.querySelectorAll('.announcement-item');
             announcementItems.forEach(item => {
                 item.addEventListener('click', function() {
@@ -533,82 +736,81 @@
                 });
             });
             
-            // 欢迎提示
+            // 歡迎提示
             setTimeout(() => {
                 console.log('歡迎參觀3D班級首頁');
             }, 1000);
         });
+
+        // 檢查登入狀態
+        function checkAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const authToken = localStorage.getItem('authToken');
+            
+            if (!isLoggedIn || !authToken) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            try {
+                // 驗證token是否有效
+                const tokenData = JSON.parse(atob(authToken));
+                const currentTime = Date.now();
+                const tokenAge = currentTime - tokenData.timestamp;
+                
+                // Token有效期24小時
+                if (tokenAge > 24 * 60 * 60 * 1000) {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userRole');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userRole');
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // 頁面載入時檢查權限
+        if (!checkAuth()) {
+            // 如果未登入，會自動跳轉到登入頁面
+        }
+
+        // 登出功能
+        document.getElementById('logout-btn')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (confirm('確定要登出嗎？')) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userRole');
+                window.location.href = 'login.html';
+            }
+        });
+
+        // 顯示當前用戶
+        function displayCurrentUser() {
+            const userRole = localStorage.getItem('userRole');
+            if (userRole) {
+                const userDisplay = document.createElement('div');
+                userDisplay.style.color = 'white';
+                userDisplay.style.marginLeft = 'auto';
+                userDisplay.style.padding = '10px';
+                userDisplay.textContent = `歡迎, ${userRole}`;
+                
+                const headerContent = document.querySelector('.header-content');
+                headerContent.appendChild(userDisplay);
+            }
+        }
+
+        // 頁面載入時顯示用戶
+        displayCurrentUser();
     </script>
 </body>
-<script>
-// 檢查登入狀態
-function checkAuth() {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    const authToken = localStorage.getItem('authToken');
-    
-    if (!isLoggedIn || !authToken) {
-        window.location.href = 'login.html';
-        return false;
-    }
-    
-    try {
-        // 驗證token是否有效
-        const tokenData = JSON.parse(atob(authToken));
-        const currentTime = Date.now();
-        const tokenAge = currentTime - tokenData.timestamp;
-        
-        // Token有效期24小時
-        if (tokenAge > 24 * 60 * 60 * 1000) {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('userRole');
-            window.location.href = 'login.html';
-            return false;
-        }
-        
-        return true;
-    } catch (error) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userRole');
-        window.location.href = 'login.html';
-        return false;
-    }
-}
-
-// 頁面載入時檢查權限
-if (!checkAuth()) {
-    // 如果未登入，會自動跳轉到登入頁面
-}
-</script>
-<script>
-// 登出功能
-document.getElementById('logout-btn')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    
-    if (confirm('確定要登出嗎？')) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userRole');
-        window.location.href = 'login.html';
-    }
-});
-
-// 顯示當前用戶
-function displayCurrentUser() {
-    const userRole = localStorage.getItem('userRole');
-    if (userRole) {
-        const userDisplay = document.createElement('div');
-        userDisplay.style.color = 'white';
-        userDisplay.style.marginLeft = '2rem';
-        userDisplay.textContent = `歡迎, ${userRole}`;
-        
-        const navContainer = document.querySelector('nav .container');
-        navContainer.appendChild(userDisplay);
-    }
-}
-
-// 頁面載入時顯示用戶
-displayCurrentUser();
-</script>
 </html>
