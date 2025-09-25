@@ -563,18 +563,7 @@
                 // 如果未登入，會自動跳轉到登入頁面
             }
 
-            // 登出功能
-            document.getElementById('logout-btn')?.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                if (confirm('確定要登出嗎？')) {
-                    localStorage.removeItem('authToken');
-                    localStorage.removeItem('isLoggedIn');
-                    localStorage.removeItem('userRole');
-                    window.location.href = 'login.html';
-                }
-            });
-        });
+          
 
         // 顯示當前用戶
         function displayCurrentUser() {
@@ -594,3 +583,4 @@
 </body>
 
 </html>
+
