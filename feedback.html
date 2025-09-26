@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>意見回饋 - 東華三院郭一葦中學</title>
+    <title>意見回饋 - KYWC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="images/icons/icon.png" sizes="16x16" type="image/png">
     <style>
@@ -335,6 +335,7 @@
             <ul class="nav-links">
                 <li><a href="index.html">回首頁</a></li>
                 <li><a href="feedback.html" class="active"><i class="fas fa-comment-dots"></i>意見回饋</a></li>
+                <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> 登出</a></li>
             </ul>
         </div>
     </nav>
@@ -390,11 +391,17 @@
                     <p>請填寫以下Google表單，您的意見將直接傳送至管理員管理系統。填寫完成後請點擊提交按鈕。</p>
                 </div>
                 
-                <!-- Google表單嵌入代碼 -->
-                <div id="form-loading" class="loading">
-                    <div class="spinner"></div>
-                    <span style="margin-left: 10px;">載入表單中...</span>
-                </div>
+        
+                
+                <!-- 使用正確的嵌入代碼 -->
+                <iframe id="google-form" 
+                        src="https://docs.google.com/forms/d/e/1FAIpQLSf-Gh0Nr1stegLMfrstn97FgwM-dls9M6Qi34quF5QdhRM2mQ/viewform?embedded=true" 
+                        class="google-form-container"
+                        frameborder="0" 
+                        marginheight="0" 
+                        marginwidth="0">
+                    載入中…
+                </iframe>
                 
                 <!-- 替代方案 -->
                 <div class="form-alternative" id="form-alternative">
@@ -496,39 +503,7 @@
             }
         }
 
-        // 表單載入處理
-        function handleFormLoad() {
-            const formLoading = document.getElementById('form-loading');
-            const googleForm = document.getElementById('google-form');
-            const formError = document.getElementById('form-error');
-            const formAlternative = document.getElementById('form-alternative');
-            
-            // 先顯示表單（移除display:none）
-            googleForm.style.display = 'block';
-            
-            // 設置表單載入成功後的處理
-            googleForm.onload = function() {
-                formLoading.style.display = 'none';
-                formError.style.display = 'none';
-            };
-            
-            // 設置表單載入失敗後的處理
-            googleForm.onerror = function() {
-                formLoading.style.display = 'none';
-                formError.style.display = 'block';
-                formAlternative.style.display = 'block';
-            };
-            
-            // 設置超時處理（10秒後如果表單仍未載入，顯示錯誤）
-            setTimeout(() => {
-                if (formLoading.style.display !== 'none') {
-                    formLoading.style.display = 'none';
-                    formError.style.display = 'block';
-                    formAlternative.style.display = 'block';
-                }
-            }, 10000);
-        }
-
+    
         // 當頁面載入完成時初始化
         document.addEventListener('DOMContentLoaded', function() {
             initBackToTop();
@@ -553,7 +528,18 @@
                 // 如果未登入，會自動跳轉到登入頁面
             }
 
-          
+            // 登出功能
+            document.getElementById('logout-btn')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (confirm('確定要登出嗎？')) {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userRole');
+                    window.location.href = 'login.html';
+                }
+            });
+        });
 
         // 顯示當前用戶
         function displayCurrentUser() {
@@ -571,8 +557,4 @@
         }
     </script>
 </body>
-
 </html>
-
-
-
