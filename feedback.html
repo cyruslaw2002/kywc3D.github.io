@@ -28,7 +28,7 @@
         }
         
         /* 導航欄樣式 - 與主站一致 */
-        nav {
+         nav {
             background: #35424a;
             color: white;
             padding: 1rem 0;
@@ -74,8 +74,7 @@
             gap: 5px;
         }
         
-        .nav-links a:hover,
-        .nav-links a.active {
+        .nav-links a:hover {
             color: #e8491d;
         }
         
@@ -221,7 +220,7 @@
             margin-top: 3rem;
         }
         
-        .back-to-top {
+            .back-to-top {
             position: fixed;
             bottom: 30px;
             right: 30px;
@@ -238,6 +237,10 @@
             transition: opacity 0.3s;
             z-index: 999;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
         }
         
         .back-to-top.visible {
@@ -333,9 +336,8 @@
         <div class="container">
             <div class="logo"><i class="fas fa-school"></i>KYWC中學</div>
             <ul class="nav-links">
-                <li><a href="index.html">回首頁</a></li>
+                <li><a href="index.html"><i class="fas fa-home"></i>回首頁</a></li>
                 <li><a href="feedback.html" class="active"><i class="fas fa-comment-dots"></i>意見回饋</a></li>
-                <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> 登出</a></li>
             </ul>
         </div>
     </nav>
