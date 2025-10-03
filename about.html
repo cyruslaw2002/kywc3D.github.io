@@ -763,9 +763,56 @@
             }
             
             initBackToTop();
-        });
+            // 檢查登入狀態
+function checkAuth() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!isLoggedIn || !authToken) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    
+    try {
+        // 驗證token是否有效
+        const tokenData = JSON.parse(atob(authToken));
+        const currentTime = Date.now();
+        const tokenAge = currentTime - tokenData.timestamp;
+        
+        // Token有效期24小時
+        if (tokenAge > 24 * 60 * 60 * 1000) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userRole');
+        window.location.href = 'login.html';
+        return false;
+    }
+}
+
+// 頁面載入時檢查權限
+if (!checkAuth()) {
+    // 如果未登入，會自動跳轉到登入頁面
+}
+
+// 頁面載入時顯示用戶
+document.addEventListener('DOMContentLoaded', function() {
+    displayCurrentUser();
+    
+    // 定期檢查登入狀態（每5分鐘）
+    setInterval(checkAuth, 5 * 60 * 1000);
+});
     </script>
 </body>
 
 </html>
+
 
