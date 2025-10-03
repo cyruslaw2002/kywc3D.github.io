@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/icons/icon.png" sizes="16x16" type="image/png">
+    <title>班會幹事 KYWC_3D</title>
+    <style>
+        /* 共用樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 導航欄樣式 */
+        nav {
+            background: #35424a;
+            color: white;
+            padding: 1rem 0;
+        }
+        
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 130%;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            list-style: none;
+            display: flex;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            padding: 8px;
+            display: inline-block;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a:focus {
+            color: #e8491d;
+            outline: 2px solid #e8491d;
+            outline-offset: 2px;
+        }
+        
+        /* 頁面標頭 */
+        .page-header {
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #4a5faa 0%, #603b8a 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .page-header p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+        
+        /* 班會幹事介紹 */
+        .committee-intro {
+            padding: 4rem 0;
+            background: white;
+        }
+        
+        .intro-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .intro-content h2 {
+            font-size: 2.5rem;
+            color: #35424a;
+            margin-bottom: 1.5rem;
+        }
+        
+        .intro-content p {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+        
+        /* 班會幹事表格 */
+        .committee-section {
+            padding: 4rem 0;
+            background: #f8f9fa;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #35424a;
+            margin-bottom: 3rem;
+        }
+        
+        .committee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .committee-category {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+        }
+        
+        .category-header {
+            background: linear-gradient(135deg, #4a5faa 0%, #603b8a 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .committee-list {
+            padding: 1.5rem;
+        }
+        
+        .committee-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .committee-item:last-child {
+            border-bottom: none;
+        }
+        
+        .member-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .member-name {
+            font-weight: bold;
+            color: #35424a;
+        }
+        
+        .member-class-number {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .member-role {
+            color: #4a5faa;
+            font-weight: 500;
+        }
+        
+        /* 動畫效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-item {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .animate-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 支持減少動畫偏好 */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+            
+            .animate-item {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .intro-content h2 {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+            }
+            
+            .nav-links li {
+                margin: 0.5rem 0;
+            }
+            
+            .committee-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 頁尾樣式 */
+        footer {
+            background: #35424a;
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 3rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            text-align: left;
+        }
+        
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links h4 {
+            margin-bottom: 1rem;
+            color: #e8491d;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: inline-block;
+            padding: 4px 0;
+        }
+        
+        .footer-links a:hover,
+        .footer-links a:focus {
+            color: #e8491d;
+            outline: 2px solid #e8491d;
+            outline-offset: 2px;
+        }
+        
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #555;
+            color: #e0e0e0;
+        }
+        
+        /* 回到頂部按鈕 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #e8491d;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-decoration: none;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+        }
+        
+        .back-to-top:focus {
+            outline: 3px solid #ffb399;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav aria-label="主要導航">
+        <div class="container">
+            <div class="logo">班會幹事</div>
+            <ul class="nav-links">
+                <li><a href="index.html" aria-label="回首頁">回首頁</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 頁面標頭 -->
+    <header class="page-header">
+        <div class="container">
+            <h1>3D班班會幹事</h1>
+            <p>2025-2026年度班會幹事成員</p>
+        </div>
+    </header>
+
+    <!-- 主要內容 -->
+    <main>
+        <!-- 班會幹事介紹 -->
+
+        <!-- 班會幹事表格 -->
+        <section class="committee-section">
+            <div class="container">
+                <h2 class="section-title">班會幹事名單</h2>
+                
+                <div class="committee-grid">
+                    <!-- 班長組 -->
+                    <div class="committee-category animate-item">
+                        <div class="category-header">
+                            <div class="category-title">班長組</div>
+                        </div>
+                        <div class="committee-list">
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">許紫妮</span>
+                                    <span class="member-class-number">班號: 16</span>
+                                </div>
+                                <div class="member-role">班長1</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">阮文謙</span>
+                                    <span class="member-class-number">班號: 30</span>
+                                </div>
+                                <div class="member-role">班長2</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">曾泯豪</span>
+                                    <span class="member-class-number">班號: 31</span>
+                                </div>
+                                <div class="member-role">班長3</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 班會核心幹事 -->
+                    <div class="committee-category animate-item">
+                        <div class="category-header">
+                            <div class="category-title">班會核心幹事</div>
+                        </div>
+                        <div class="committee-list">
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">梁穎珈</span>
+                                    <span class="member-class-number">班號: 19</span>
+                                </div>
+                                <div class="member-role">班會主席</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">羅卓熹</span>
+                                    <span class="member-class-number">班號: 17</span>
+                                </div>
+                                <div class="member-role">班會康樂</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">敖埴苗</span>
+                                    <span class="member-class-number">班號: 22</span>
+                                </div>
+                                <div class="member-role">班會文書</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">范琇瑜</span>
+                                    <span class="member-class-number">班號: 11</span>
+                                </div>
+                                <div class="member-role">班會總務</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">鍾卓軒</span>
+                                    <span class="member-class-number">班號: 10</span>
+                                </div>
+                                <div class="member-role">班會財政</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">葉梓淇</span>
+                                    <span class="member-class-number">班號: 29</span>
+                                </div>
+                                <div class="member-role">班會美術</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 服務與推廣 -->
+                    <div class="committee-category animate-item">
+                        <div class="category-header">
+                            <div class="category-title">服務與推廣</div>
+                        </div>
+                        <div class="committee-list">
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">王振熙</span>
+                                    <span class="member-class-number">班號: 28</span>
+                                </div>
+                                <div class="member-role">閱讀推廣大使 (中文)</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">彭漢霖</span>
+                                    <span class="member-class-number">班號: 23</span>
+                                </div>
+                                <div class="member-role">閱讀推廣大使 (英文)</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">李瑢陞</span>
+                                    <span class="member-class-number">班號: 18</span>
+                                </div>
+                                <div class="member-role">午膳服務生1</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">鄧仲希</span>
+                                    <span class="member-class-number">班號: 24</span>
+                                </div>
+                                <div class="member-role">午膳服務生2</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 學習支持 -->
+                    <div class="committee-category animate-item">
+                        <div class="category-header">
+                            <div class="category-title">學習支持</div>
+                        </div>
+                        <div class="committee-list">
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">陳彥彤</span>
+                                    <span class="member-class-number">班號: 3</span>
+                                </div>
+                                <div class="member-role">收功課大使1</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">呂紫彤</span>
+                                    <span class="member-class-number">班號: 21</span>
+                                </div>
+                                <div class="member-role">收功課大使2</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">何承熹</span>
+                                    <span class="member-class-number">班號: 15</span>
+                                </div>
+                                <div class="member-role">收功課大使3</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">周恒睿</span>
+                                    <span class="member-class-number">班號: 4</span>
+                                </div>
+                                <div class="member-role">值日生總管</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 科長組 -->
+                    <div class="committee-category animate-item">
+                        <div class="category-header">
+                            <div class="category-title">科長組</div>
+                        </div>
+                        <div class="committee-list">
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">鍾卓軒</span>
+                                    <span class="member-class-number">班號: 10</span>
+                                </div>
+                                <div class="member-role">中文科長 (藍) / 數學科長(紅)</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">梁穎珈</span>
+                                    <span class="member-class-number">班號: 19</span>
+                                </div>
+                                <div class="member-role">英文科長(黃)</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">何洛宜</span>
+                                    <span class="member-class-number">班號: 14</span>
+                                </div>
+                                <div class="member-role">中文科長(紅)</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">羅卓熹</span>
+                                    <span class="member-class-number">班號: 17</span>
+                                </div>
+                                <div class="member-role">英文科長(黃) / 中文科長(紅)</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">鄭斯尹</span>
+                                    <span class="member-class-number">班號: 8</span>
+                                </div>
+                                <div class="member-role">英文科長(藍)</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">范琇瑜</span>
+                                    <span class="member-class-number">班號: 11</span>
+                                </div>
+                                <div class="member-role">數學科長(藍)</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">何皓聲</span>
+                                    <span class="member-class-number">班號: 13</span>
+                                </div>
+                                <div class="member-role">數學科長(藍) / 公經社科長</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">王振熙</span>
+                                    <span class="member-class-number">班號: 28</span>
+                                </div>
+                                <div class="member-role">數學科長(黃)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 專科科長 -->
+                    <div class="committee-category animate-item">
+                        <div class="category-header">
+                            <div class="category-title">專科科長</div>
+                        </div>
+                        <div class="committee-list">
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">敖煊苗</span>
+                                    <span class="member-class-number">班號: 22</span>
+                                </div>
+                                <div class="member-role">科學科長 / 物理科長</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">許紫妮</span>
+                                    <span class="member-class-number">班號: 16</span>
+                                </div>
+                                <div class="member-role">地理科長</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">阮文謙</span>
+                                    <span class="member-class-number">班號: 30</span>
+                                </div>
+                                <div class="member-role">歷史科長 / 體育科長</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">鄧立堯</span>
+                                    <span class="member-class-number">班號: 25</span>
+                                </div>
+                                <div class="member-role">科技科長 / 中史科長</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">林子渝</span>
+                                    <span class="member-class-number">班號: 20</span>
+                                </div>
+                                <div class="member-role">視藝科長</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">謝思晴</span>
+                                    <span class="member-class-number">班號: 27</span>
+                                </div>
+                                <div class="member-role">音樂科長</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">李瑢陞</span>
+                                    <span class="member-class-number">班號: 18</span>
+                                </div>
+                                <div class="member-role">普通電腦</div>
+                            </div>
+                            <div class="committee-item">
+                            <div class="member-info">
+                                    <span class="member-name">彭漢霖</span>
+                                    <span class="member-class-number">班號: 17</span>
+                                </div>
+                                <div class="member-role">化學科長</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">羅卓熹</span>
+                                    <span class="member-class-number">班號: 17</span>
+                                </div>
+                                <div class="member-role">IT BOY</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 其他職務 -->
+                    <div class="committee-category animate-item">
+                        <div class="category-header">
+                            <div class="category-title">其他職務</div>
+                        </div>
+                        <div class="committee-list">
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">何皓聲</span>
+                                    <span class="member-class-number">班號: 13</span>
+                                </div>
+                                <div class="member-role">鎖匙長1</div>
+                            </div>
+                            <div class="committee-item">
+                                <div class="member-info">
+                                    <span class="member-name">王振熙</span>
+                                    <span class="member-class-number">班號: 28</span>
+                                </div>
+                                <div class="member-role">鎖匙長2</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 回到頂部按鈕 -->
+    <a href="#" class="back-to-top" aria-label="回到頁面頂部">
+        <span aria-hidden="true">↑</span>
+    </a>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">3D班</div>
+                    <p>一個充滿愛與學習的大家庭</p>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>快速連結</h4>
+                    <ul>
+                        <li><a href="index.html">網站首頁</a></li>
+                        <li><a href="gallery.html">班級相册</a></li>
+                        <li><a href="resources.html">學習資源</a></li>
+                        <li><a href="calendar.html">班級日曆</a></li>
+                        <li><a href="info.html">學校資訊</a></li>
+                        <li><a href="about.html">關於我們</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>相關資源</h4>
+                    <ul>
+                        <li><a href="https://www.twghkywc.edu.hk">學校官網</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+
+
+    <script>
+        // 動畫可見性控制
+        function checkVisibility() {
+            const animateItems = document.querySelectorAll('.animate-item');
+            
+            animateItems.forEach(item => {
+                const rect = item.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                
+                if (rect.top < windowHeight * 0.85) {
+                    item.classList.add('visible');
+                }
+            });
+        }
+        
+        // 回到頂部功能
+        function initBackToTop() {
+            const backToTopBtn = document.querySelector('.back-to-top');
+            
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+            
+            backToTopBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: shouldReduceMotion() ? 'auto' : 'smooth'
+                });
+            });
+        }
+        
+        // 檢查是否需要減少動畫
+        function shouldReduceMotion() {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 如果用戶偏好減少動畫，直接顯示所有元素
+            if (shouldReduceMotion()) {
+                document.querySelectorAll('.animate-item').forEach(item => {
+                    item.classList.add('visible');
+                });
+            } else {
+                checkVisibility();
+                window.addEventListener('scroll', checkVisibility);
+            }
+            
+            initBackToTop();
+        });
+            // 檢查登入狀態
+    function checkAuth() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const authToken = localStorage.getItem('authToken');
+        
+        if (!isLoggedIn || !authToken) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        try {
+            // 驗證token是否有效
+            const tokenData = JSON.parse(atob(authToken));
+            const currentTime = Date.now();
+            const tokenAge = currentTime - tokenData.timestamp;
+            
+            // Token有效期24小時
+            if (tokenAge > 24 * 60 * 60 * 1000) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userRole');
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+            return false;
+        }
+    }
+
+    // 頁面載入時檢查權限
+    if (!checkAuth()) {
+        // 如果未登入，會自動跳轉到登入頁面
+    }
+    </script>
+</body>
+</html>

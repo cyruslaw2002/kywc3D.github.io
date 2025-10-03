@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班級相册 - 我們的回憶</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 基本樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 導航欄樣式 - 與主站一致 */
+        nav {
+            background: #35424a;
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 130%;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: #e8491d;
+        }
+        
+        .nav-links {
+            list-style: none;
+            display: flex;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 44px; /* 確保足夠的點擊區域 */
+            padding: 0 5px;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a:focus {
+            color: #e8491d;
+            outline: 2px solid #e8491d;
+            outline-offset: 2px;
+        }
+        
+        /* 相册專用樣式 */
+        .gallery-header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .gallery-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .gallery-intro {
+            text-align: center;
+            padding: 2rem 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* 篩選按鈕 */
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 0 1rem;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #35424a;
+            background: white;
+            color: #35424a;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px; /* 確保足夠的點擊區域 */
+        }
+        
+        .filter-btn:hover,
+        .filter-btn:focus,
+        .filter-btn.active {
+            background: #35424a;
+            color: white;
+            outline: 2px solid #35424a;
+            outline-offset: 2px;
+        }
+        
+        /* 相册網格 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem 0;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .gallery-item:hover,
+        .gallery-item:focus-within {
+            transform: translateY(-5px);
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 1rem;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+        
+        .gallery-item:hover .image-overlay,
+        .gallery-item:focus-within .image-overlay {
+            transform: translateY(0);
+        }
+        
+        .image-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .image-date {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .image-description {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+        
+        /* 燈箱樣式 */
+        #lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 2rem;
+        }
+
+        #lightbox[aria-hidden="false"] {
+            display: flex;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lightbox-image {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .lightbox-caption {
+            color: white;
+            text-align: center;
+            margin-top: 1.5rem;
+            max-width: 600px;
+        }
+
+        .lightbox-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .lightbox-description {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .lightbox-date {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        .lightbox-content .close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .lightbox-content .close:hover,
+        .lightbox-content .close:focus {
+            outline: 2px solid white;
+            border-radius: 50%;
+        }
+
+        /* 新样式：相册组 */
+        .album-group {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s;
+            grid-column: 1 / -1;
+        }
+        
+        .album-group:hover,
+        .album-group:focus-within {
+            transform: translateY(-5px);
+        }
+        
+        .album-header {
+            padding: 1rem;
+            background: #35424a;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 44px;
+        }
+        
+        .album-header:hover,
+        .album-header:focus {
+            outline: 2px solid #e8491d;
+        }
+        
+        .album-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .album-count {
+            background: rgba(255,255,255,0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .album-content {
+            display: none;
+            padding: 1rem;
+        }
+        
+        .album-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .album-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .album-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .album-image:hover,
+        .album-image:focus {
+            transform: scale(1.05);
+            outline: 2px solid #667eea;
+        }
+        
+        .album-description {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .album-date {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        /* 加载动画 */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loader[aria-hidden="false"] {
+            display: block;
+        }
+        
+        .loader .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #35424a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            grid-column: 1 / -1;
+            color: #666;
+        }
+        
+        .empty-state[aria-hidden="true"] {
+            display: none;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .filter-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-btn {
+                width: 200px;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-links li {
+                margin: 0;
+            }
+
+            .lightbox-content {
+                max-width: 95%;
+            }
+            
+            .lightbox-title {
+                font-size: 1.2rem;
+            }
+            
+            .lightbox-description {
+                font-size: 1rem;
+            }
+            
+            .album-images {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .album-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+        
+        /* 頁尾樣式 */
+        footer {
+            background: #35424a;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #e8491d;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border: none;
+        }
+        
+        .back-to-top:hover,
+        .back-to-top:focus {
+            outline: 2px solid white;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+        }
+
+        /* 跳轉鏈接樣式 */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #35424a;
+            color: white;
+            padding: 8px;
+            z-index: 100;
+            text-decoration: none;
+        }
+
+        .skip-link:focus {
+            top: 0;
+            outline: 2px solid #e8491d;
+        }
+    </style>
+</head>
+<body>
+    <!-- 跳轉鏈接 - 幫助屏幕閱讀器快速跳轉到主要內容 -->
+    <a href="#main-content" class="skip-link">跳至主要內容</a>
+
+    <!-- 導航欄 -->
+    <nav aria-label="主要導航">
+        <div class="container">
+            <div class="logo"><i class="fas fa-camera" aria-hidden="true"></i>班級相册</div>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home" aria-hidden="true"></i>回首頁</a></li>
+                <li id="user-info"></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主要內容 -->
+    <main id="main-content">
+        <!-- 相册標頭 -->
+        <header class="gallery-header">
+            <div class="container">
+                <h1>KYWC_3D 美好回憶</h1>
+                <p>記錄我們一起走過的點點滴滴</p>
+            </div>
+        </header>
+
+        <!-- 相册介紹 -->
+        <section class="gallery-intro">
+            <div class="container">
+                <h2>我們的青春時光</h2>
+                <p>這裡收藏著我們班的珍貴時刻，從開學到畢業，每一個笑容都值得被記住。</p>
+            </div>
+        </section>
+
+        <!-- 篩選按鈕 -->
+        <div class="filter-buttons" role="group" aria-label="照片分類篩選">
+            <button class="filter-btn active" data-category="all" aria-pressed="true"><i class="fas fa-images" aria-hidden="true"></i>全部照片</button>
+            <button class="filter-btn" data-category="activity" aria-pressed="false"><i class="fas fa-users" aria-hidden="true"></i>班級活動</button>
+            <button class="filter-btn" data-category="sports" aria-pressed="false"><i class="fas fa-running" aria-hidden="true"></i>運動會</button>
+            <button class="filter-btn" data-category="trip" aria-pressed="false"><i class="fas fa-bus" aria-hidden="true"></i>校外教學</button>
+            <button class="filter-btn" data-category="teachers" aria-pressed="false"><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>老師照片</button>
+        </div>
+
+        <!-- 相册網格 -->
+        <div class="container">
+            <div class="gallery-grid" id="photo-gallery" aria-live="polite">
+                <!-- 相册组会通过JavaScript动态生成 -->
+            </div>
+            
+            <div class="loader" id="loader" aria-hidden="true" role="status">
+                <div class="spinner" aria-hidden="true"></div>
+                <p>正在加载照片...</p>
+            </div>
+            
+            <div class="empty-state" id="empty-state" aria-hidden="true">
+                <i class="fas fa-image" aria-hidden="true"></i>
+                <h3>暂无照片</h3>
+                <p>选择其他分类试试看</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 燈箱 -->
+    <div id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+        <div class="lightbox-content">
+            <button class="close" aria-label="關閉燈箱">&times;</button>
+            <img src="" alt="" class="lightbox-image">
+            <div class="lightbox-caption">
+                <h3 class="lightbox-title" id="lightbox-title"></h3>
+                <p class="lightbox-description"></p>
+                <p class="lightbox-date"></p>
+            </div>
+        </div>
+    </div>
+
+    <button class="back-to-top" id="back-to-top" aria-label="返回頁面頂部">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </button>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 KYWC_3D 班級相册。珍貴回憶，永留存。</p>
+        </div>
+    </footer>
+
+    <script>
+        // 圖片資料庫 - 使用本地 images 資料夾
+        const imageDatabase = [
+            // 班級活動照片
+            {
+                id: 1,
+                filename: 'class_photo_1.jpg',
+                path: 'images/gallery/class_photo_1.jpg',
+                title: '2025年開學合照',
+                description: '新學期開始的全班大合照',
+                date: '2025-08-30',
+                category: 'activity',
+                tags: ['開學', '合照', '全班'],
+                album: '開學活動'
+            },
+            {
+                id: 2,
+                filename: '環校跑 2024.jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (1).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['開學', '合照', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+            id: 2,
+                filename: '環校跑 2024.jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (1).jpeg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['開學', '合照', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 3,
+                filename: '環校跑 2024 (2).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (2).jpeg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 4,
+                filename: '環校跑 2024 (3).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (3).jpeg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 5,
+                filename: '環校跑 2024 (4).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (4).jpeg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 6,
+                filename: '環校跑 2024 (5).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (5).jpeg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 7,
+                filename: '環校跑 2024 (6).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (6).jpeg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 8,
+                filename: '環校跑 2024 (7).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (7).jpeg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 9,
+                filename: '環校跑 2024 (8).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (10).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 10,
+                filename: '環校跑 2024 (9).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (11).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 11,
+                filename: '環校跑 2024 (10).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (12).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 12,
+                filename: '環校跑 2024 (11).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (13).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 13,
+                filename: '環校跑 2024 (12).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (14).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 14,
+                filename: '環校跑 2024 (13).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (15).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 15,
+                filename: '環校跑 2024 (14).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (16).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 16,
+                filename: '環校跑 2024 (15).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (17).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 17,
+                filename: '環校跑 2024 (16).jpg',
+                path: 'images/gallery/環校跑 2024/環校跑 2024 (18).jpg',
+                title: '環校跑 2024',
+                description: '',
+                date: '2024-11-24',
+                category: 'activity',
+                tags: ['環校跑', '運動', '全班'],
+                album: '環校跑 2024'
+            },
+            {
+                id: 50,
+                filename: '環校跑 2024 (10).jpg',
+                path: 'images/D班主任課/2025-2026 年度班主任課 (1).jpeg',
+                title: '年度班主任課2025',
+                description: '',
+                date: '2025-09-22',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '年度班主任課2025-2026'
+            },
+            {
+                id: 51,
+                filename: '2025-2026 年度班主任課 (2).jpeg',
+                path: 'images/D班主任課/2025-2026 年度班主任課 (2).jpeg',
+                title: '年度班主任課2025',
+                description: '',
+                date: '2025-09-22',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '年度班主任課2025-2026'
+            },
+            {
+                id: 52,
+                filename: '2025-2026 年度班主任課 (3).jpeg',
+                path: 'images/D班主任課/2025-2026 年度班主任課 (3).jpeg',
+                title: '年度班主任課2025',
+                description: '',
+                date: '2025-09-22',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '年度班主任課2025-2026'
+            },
+            {
+                id: 53,
+                filename: '2025-2026 年度班主任課 (4).jpeg',
+                path: 'images/D班主任課/2025-2026 年度班主任課 (4).jpeg',
+                title: '年度班主任課2025',
+                description: '',
+                date: '2025-09-22',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '年度班主任課2025-2026'
+            },
+            {
+                id: 54,
+                filename: '2025-2026 年度班主任課 (5).jpeg',
+                path: 'images/D班主任課/2025-2026 年度班主任課 (5).jpeg',
+                title: '年度班主任課2025',
+                description: '',
+                date: '2025-09-22',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '年度班主任課2025-2026'
+            },
+            {
+                id: 55,
+                filename: '2025-2026 年度班主任課 (6).jpeg',
+                path: 'images/D班主任課/2025-2026 年度班主任課 (6).jpeg',
+                title: '年度班主任課2025',
+                description: '',
+                date: '2025-09-22',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '年度班主任課2025-2026'
+            },
+            {
+                id: 56,
+                filename: '東華「My Way」生涯規劃課(1).jpeg',
+                path: 'images/東華「My Way」生涯規劃課/東華「My Way」生涯規劃課 (1).jpeg',
+                title: '東華「My Way」生涯規劃課',
+                description: '',
+                date: '2024-09-27',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '2024東華「My Way」生涯規劃課'
+            },
+            {
+                id: 57,
+                filename: '東華「My Way」生涯規劃課(2).jpeg',
+                path: 'images/東華「My Way」生涯規劃課/東華「My Way」生涯規劃課 (2).jpeg',
+                title: '東華「My Way」生涯規劃課',
+                description: '',
+                date: '2024-09-27',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '2024東華「My Way」生涯規劃課'
+            },
+            {
+                id: 58,
+                filename: '東華「My Way」生涯規劃課(3).jpeg',
+                path: 'images/東華「My Way」生涯規劃課/東華「My Way」生涯規劃課 (3).jpeg',
+                title: '東華「My Way」生涯規劃課',
+                description: '',
+                date: '2024-09-27',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '2024東華「My Way」生涯規劃課'
+            },
+            {
+                id: 59,
+                filename: '東華「My Way」生涯規劃課(4).jpeg',
+                path: 'images/東華「My Way」生涯規劃課/東華「My Way」生涯規劃課 (4).jpeg',
+                title: '東華「My Way」生涯規劃課',
+                description: '',
+                date: '2024-09-27',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '2024東華「My Way」生涯規劃課'
+            },
+            {
+                id: 60,
+                filename: '東華「My Way」生涯規劃課(5).jpeg',
+                path: 'images/東華「My Way」生涯規劃課/東華「My Way」生涯規劃課 (5).jpeg',
+                title: '東華「My Way」生涯規劃課',
+                description: '',
+                date: '2024-09-27',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '2024東華「My Way」生涯規劃課'
+            },
+            {
+                id: 61,
+                filename: '東華「My Way」生涯規劃課(6).jpeg',
+                path: 'images/東華「My Way」生涯規劃課/東華「My Way」生涯規劃課 (6).jpeg',
+                title: '東華「My Way」生涯規劃課',
+                description: '',
+                date: '2024-09-27',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '2024東華「My Way」生涯規劃課'
+            },
+            {
+                id: 62,
+                filename: '東華「My Way」生涯規劃課(7).jpeg',
+                path: 'images/東華「My Way」生涯規劃課/東華「My Way」生涯規劃課 (7).jpeg',
+                title: '東華「My Way」生涯規劃課',
+                description: '',
+                date: '2024-09-27',
+                category: 'activity',
+                tags: ['班主任課', '運動', '全班'],
+                album: '2024東華「My Way」生涯規劃課'
+            },
+            // 運動會照片
+            {
+                id: 12,
+                filename: 'sports_relay.jpg',
+                path: 'images/gallery/sports_relay.jpeg',
+                title: '2025元朗手球盃',
+                description: '郭中手球隊出戰元朗手球盃季軍戰賽事',
+                date: '2025-08-30',
+                category: 'sports',
+                tags: ['運動會', '接力賽', '比賽'],
+                album: '手球比賽'
+            },
+            // 校外教學照片
+            {
+                id: 13,
+                filename: 'graduation_trip.jpg',
+                path: 'images/V-Star 長者探訪/V-Star 長者探訪 (1).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-30',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'
+            },
+            {
+                id: 14,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (2).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'
+            },
+            {
+                id: 15,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (3).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'   
+            },
+            {
+                id: 16,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (4).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'   
+            },
+            {
+                id: 17,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (5).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'   
+            },
+            {
+                id: 18,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (6).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'   
+            },
+            {
+                id: 19,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (7).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'   
+            },
+            {
+                id: 20,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (8).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'   
+            },
+            {
+                id: 21,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (9).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'   
+            },
+            {
+                id: 22,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (10).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'  
+            },
+            {
+                id: 23,
+                filename: 'graduation_trip.jpg',
+                path: '/images/V-Star 長者探訪/V-Star 長者探訪 (11).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 長者探訪'  
+            },
+            {
+                id: 24,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (1).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'  
+            },
+            {
+                id: 25,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (2).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'  
+            },
+            {
+                id: 26,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (3).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 27,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (4).jpeg',
+                title: 'V-Star 長者探訪',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'      
+            },
+            {
+                id: 28,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (5).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 29,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (6).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 30,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (7).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 31,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (8).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 32,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (9).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 33,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (10).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 34,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (11).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 35,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (12).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 36,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (13).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 37,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (14).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 38,
+                filename: 'graduation_trip.jpg',
+                path: 'images/參觀香港文化博物館/參觀香港文化博物館 (15).jpeg',
+                title: '參觀香港文化博物館',
+                description: '',
+                date: '2025-04-31',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '參觀香港文化博物館'
+            },
+            {
+                id: 39,
+                filename: 'graduation_trip.jpg',
+                path: 'images/V-Star 沙頭角/V-star 沙頭角 (1).jpeg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 沙頭角'
+            },
+            {
+                id: 40,
+                filename: 'graduation_trip.jpg',
+                path: 'images/V-Star 沙頭角/V-star 沙頭角 (2).jpeg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 沙頭角'
+            },
+            {
+                id: 41,
+                filename: 'graduation_trip.jpg',
+                path: 'images/V-Star 沙頭角/V-star 沙頭角 (3).jpeg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 沙頭角'
+            },
+            {
+                id: 42,
+                filename: 'graduation_trip.jpg',
+                path: 'images/V-Star 沙頭角/V-star 沙頭角 (4).jpeg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 沙頭角'
+            },
+            {
+                id: 43,
+                filename: 'V-star 沙頭角 (6).jpeg',
+                path: 'images/V-Star 沙頭角/V-star 沙頭角 (1).jpg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 沙頭角'
+            },
+            {
+                id: 44,
+                filename: 'V-star 沙頭角 (7).jpeg',
+                path: 'images/V-Star 沙頭角/V-star 沙頭角 (2).jpg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 沙頭角'
+            },
+            {
+                id: 45,
+                filename: 'V-star 沙頭角 (8).jpeg',
+                path: 'images/V-Star 沙頭角/V-star 沙頭角 (3).jpg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 沙頭角'
+            },
+            {
+                id: 46,
+                filename: 'V-star 沙頭角 (9).jpeg',
+                path: 'images/V-Star 沙頭角/V-star 沙頭角 (4).jpg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 沙頭角'
+            },
+            {
+                id: 47,
+                filename: 'V-star 沙頭角 (10).jpeg',
+                path: 'images/V-Star 沙頭角/V-star 沙頭角 (5).jpg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: 'V-Star 沙頭角'
+            },
+            {
+                d: 48,
+                filename: '2024學校旅行 (1).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (1).jpeg',
+                title: 'V-Star 沙頭角',
+                description: '',
+                date: '2025-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 49,
+                filename: '2024學校旅行 (2).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (2).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 50,
+                filename: '2024學校旅行 (3).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (3).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 51,
+                filename: '2024學校旅行 (4).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (4).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 52,
+                filename: '2024學校旅行 (5).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (5).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 53,
+                filename: '2024學校旅行 (6).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (6).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 54,
+                filename: '2024學校旅行 (7).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (7).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 55,
+                filename: '2024學校旅行 (8).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (8).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 56,
+                filename: '2024學校旅行 (9).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (9).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 57,
+                filename: '2024學校旅行 (10).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (10).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 58,
+                filename: '2024學校旅行 (11).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (11).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 59,
+                filename: '2024學校旅行 (12).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (12).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 60,
+                filename: '2024學校旅行 (13).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (13).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 61,
+                filename: '2024學校旅行 (14).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (14).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 62,
+                filename: '2024學校旅行 (15).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (15).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 63,
+                filename: '2024學校旅行 (16).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (16).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 64,
+                filename: '2024學校旅行 (17).jpeg',
+                path: 'images/2024學校旅行/2024學校旅行 (17).jpeg',
+                title: '2024學校旅行',
+                description: '',
+                date: '2024-01-24',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2024學校旅行'
+            },
+            {
+                id: 65,
+                filename: '熊貓保育教育學習日 (1).jpeg',
+                path: 'images/熊貓保育教育學習日/熊貓保育教育學習日 (1).jpeg',
+                title: '熊貓保育教育學習日',
+                description: '',
+                date: '2025-02-12',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2025熊貓保育教育學習日'
+            },
+            {
+                id: 66,
+                filename: '熊貓保育教育學習日 (2).jpeg',
+                path: 'images/熊貓保育教育學習日/熊貓保育教育學習日 (2).jpeg',
+                title: '熊貓保育教育學習日',
+                description: '',
+                date: '2025-02-12',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2025熊貓保育教育學習日'
+            },
+            {
+                id: 67,
+                filename: '熊貓保育教育學習日 (3).jpeg',
+                path: 'images/熊貓保育教育學習日/熊貓保育教育學習日 (3).jpeg',
+                title: '熊貓保育教育學習日',
+                description: '',
+                date: '2025-02-12',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2025熊貓保育教育學習日'
+            },
+            {
+                id: 68,
+                filename: '熊貓保育教育學習日 (4).jpeg',
+                path: 'images/熊貓保育教育學習日/熊貓保育教育學習日 (4).jpeg',
+                title: '熊貓保育教育學習日',
+                description: '',
+                date: '2025-02-12',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '2025熊貓保育教育學習日'
+            },
+            {
+                id: 69,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (1).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (1).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 70,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (2).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (2).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {    
+                id: 71,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (3).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (3).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 72,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (4).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (4).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 73,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (5).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (5).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {   
+                id: 74,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (6).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (6).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            { 
+                id: 75,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (7).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (7).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 76,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (8).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (8).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 77,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (9).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (9).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 78,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (10).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (10).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            }, 
+            {
+                id: 79,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (11).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (11).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 80,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (12).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (12).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 81,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (13).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (13).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 82,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (14).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (14).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 83,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (15).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (15).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 84,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (16).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (16).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 85,
+                filename: '廣州的城市規劃及經濟發展探索之旅 (17).jpeg',
+                path: 'images/廣州的城市規劃及經濟發展探索之旅/廣州的城市規劃及經濟發展探索之旅 (17).jpeg',
+                title: '廣州的城市規劃及經濟發展探索之旅',
+                description: '',
+                date: '2024-06-27',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '廣州的城市規劃及經濟發展探索之旅'
+            },
+            {
+                id: 86,
+                filename: '黑暗中對話體驗 (1).jpeg',
+                path: 'images/黑暗中對話體驗/黑暗中對話體驗 (1).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 87,
+                filename: '黑暗中對話體驗 (2).jpeg',
+                path: 'images/黑暗中對話體驗/黑暗中對話體驗 (2).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 88,
+                filename: '黑暗中對話體驗 (3).jpeg',
+                 path: 'images/黑暗中對話體驗/黑暗中對話體驗 (3).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 89,
+                filename: '黑暗中對話體驗 (4).jpeg',
+                 path: 'images/黑暗中對話體驗/黑暗中對話體驗 (4).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 90,
+                filename: '黑暗中對話體驗 (5).jpeg',
+                 path: 'images/黑暗中對話體驗/黑暗中對話體驗 (5).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 91,
+                filename: '黑暗中對話體驗 (6).jpeg',
+                 path: 'images/黑暗中對話體驗/黑暗中對話體驗 (6).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 92,
+                filename: '黑暗中對話體驗 (7).jpeg',
+                 path: 'images/黑暗中對話體驗/黑暗中對話體驗 (7).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 93,
+                filename: '黑暗中對話體驗 (8).jpeg',
+                 path: 'images/黑暗中對話體驗/黑暗中對話體驗 (9).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 94,
+                filename: '黑暗中對話體驗 (9).jpeg',
+                 path: 'images/黑暗中對話體驗/黑暗中對話體驗 (9).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 95,
+                filename: '黑暗中對話體驗 (10).jpeg',
+                 path: 'images/黑暗中對話體驗/黑暗中對話體驗 (10).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+            {
+                id: 96,
+                filename: '黑暗中對話體驗 (11).jpeg',
+                 path: 'images/黑暗中對話體驗/黑暗中對話體驗 (11).jpeg',
+                title: '黑暗中對話體驗',
+                description: '',
+                date: '2025-09-26',
+                category: 'trip',
+                tags: ['校外教學', '旅行', '回憶'],
+                album: '黑暗中對話體驗'
+            },
+
+            // 老師照片
+            {
+                id: 48,
+                filename: 'teacher_zhang.jpg',
+                path: 'images/teachers/teacher_zhang.jpg',
+                title: '張老師',
+                description: '班導師/國文老師 - 擁有15年教學經驗',
+                date: '2025-09-01',
+                category: 'teachers',
+                tags: ['老師', '導師', '國文'],
+                album: '教師團隊'
+            },
+
+            
+        ];
+
+
+        // DOM 元素
+        const galleryGrid = document.getElementById('photo-gallery');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.querySelector('.lightbox-image');
+        const lightboxTitle = document.querySelector('.lightbox-title');
+        const lightboxDescription = document.querySelector('.lightbox-description');
+        const lightboxDate = document.querySelector('.lightbox-date');
+        const closeButton = document.querySelector('.lightbox-content .close');
+        const backToTopButton = document.getElementById('back-to-top');
+        const loader = document.getElementById('loader');
+        const emptyState = document.getElementById('empty-state');
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', () => {
+            // 顯示加載狀態
+            loader.setAttribute('aria-hidden', 'false');
+            
+            // 延遲加載以模擬加載過程
+            setTimeout(() => {
+                renderGallery('all');
+                loader.setAttribute('aria-hidden', 'true');
+            }, 800);
+            
+            // 初始化事件監聽器
+            initEventListeners();
+        });
+
+        // 初始化事件監聽器
+        function initEventListeners() {
+            // 過濾按鈕點擊事件
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // 更新按鈕狀態
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-pressed', 'false');
+                    });
+                    button.classList.add('active');
+                    button.setAttribute('aria-pressed', 'true');
+                    
+                    // 渲染相應分類的照片
+                    const category = button.getAttribute('data-category');
+                    renderGallery(category);
+                });
+
+                // 為按鈕添加鍵盤支持
+                button.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        button.click();
+                    }
+                });
+            });
+
+            // 關閉燈箱按鈕
+            closeButton.addEventListener('click', closeLightbox);
+            closeButton.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    closeLightbox();
+                }
+            });
+
+            // 點擊燈箱背景關閉
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            // 按ESC鍵關閉燈箱
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.getAttribute('aria-hidden') === 'false') {
+                    closeLightbox();
+                }
+            });
+
+            // 回到頂部按鈕
+            backToTopButton.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // 回到頂部按鈕的鍵盤支持
+            backToTopButton.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    backToTopButton.click();
+                }
+            });
+
+            // 滾動事件監聽器
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopButton.classList.add('visible');
+                    backToTopButton.setAttribute('aria-hidden', 'false');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                    backToTopButton.setAttribute('aria-hidden', 'true');
+                }
+            });
+        }
+
+        // 渲染相册
+        function renderGallery(category) {
+            // 清空當前相册
+            galleryGrid.innerHTML = '';
+            
+            // 過濾圖片
+            const filteredImages = category === 'all' 
+                ? imageDatabase 
+                : imageDatabase.filter(img => img.category === category);
+            
+            // 顯示空狀態或渲染圖片
+            if (filteredImages.length === 0) {
+                emptyState.setAttribute('aria-hidden', 'false');
+                return;
+            } else {
+                emptyState.setAttribute('aria-hidden', 'true');
+            }
+            
+            // 按相册分組
+            const albums = {};
+            filteredImages.forEach(img => {
+                if (!albums[img.album]) {
+                    albums[img.album] = [];
+                }
+                albums[img.album].push(img);
+            });
+            
+            // 渲染每個相册
+            Object.keys(albums).forEach(albumName => {
+                const albumImages = albums[albumName];
+                
+                // 創建相册組
+                const albumGroup = document.createElement('div');
+                albumGroup.className = 'album-group';
+                
+                // 相册標題
+                const albumHeader = document.createElement('div');
+                albumHeader.className = 'album-header';
+                albumHeader.setAttribute('role', 'button');
+                albumHeader.setAttribute('tabindex', '0');
+                albumHeader.setAttribute('aria-expanded', 'false');
+                albumHeader.setAttribute('aria-controls', `album-${albumName.replace(/\s+/g, '-')}`);
+                
+                const albumTitle = document.createElement('div');
+                albumTitle.className = 'album-title';
+                albumTitle.innerHTML = `<i class="fas fa-folder-open" aria-hidden="true"></i>${albumName}`;
+                
+                const albumCount = document.createElement('span');
+                albumCount.className = 'album-count';
+                albumCount.textContent = `${albumImages.length} 張照片`;
+                
+                albumHeader.appendChild(albumTitle);
+                albumHeader.appendChild(albumCount);
+                
+                // 相册內容
+                const albumContent = document.createElement('div');
+                albumContent.className = 'album-content';
+                albumContent.id = `album-${albumName.replace(/\s+/g, '-')}`;
+                
+                // 相册圖片網格
+                const albumImagesGrid = document.createElement('div');
+                albumImagesGrid.className = 'album-images';
+                
+                // 添加圖片到相册
+                albumImages.forEach(img => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = img.path;
+                    imgElement.alt = img.title;
+                    imgElement.className = 'album-image';
+                    imgElement.setAttribute('tabindex', '0');
+                    imgElement.setAttribute('data-id', img.id);
+                    
+                    // 點擊圖片打開燈箱
+                    imgElement.addEventListener('click', () => openLightbox(img));
+                    
+                    // 鍵盤支持
+                    imgElement.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            openLightbox(img);
+                        }
+                    });
+                    
+                    albumImagesGrid.appendChild(imgElement);
+                });
+                
+                albumContent.appendChild(albumImagesGrid);
+                
+                // 添加相册描述（如果有）
+                const firstImage = albumImages[0];
+                if (firstImage.description) {
+                    const albumDesc = document.createElement('p');
+                    albumDesc.className = 'album-description';
+                    albumDesc.textContent = firstImage.description;
+                    albumContent.appendChild(albumDesc);
+                }
+                
+                // 添加日期
+                const albumDate = document.createElement('p');
+                albumDate.className = 'album-date';
+                albumDate.textContent = `拍攝日期: ${firstImage.date}`;
+                albumContent.appendChild(albumDate);
+                
+                // 組裝相册
+                albumGroup.appendChild(albumHeader);
+                albumGroup.appendChild(albumContent);
+                
+                // 添加到網格
+                galleryGrid.appendChild(albumGroup);
+                
+                // 相册展開/摺疊功能
+                albumHeader.addEventListener('click', () => toggleAlbum(albumHeader, albumContent));
+                albumHeader.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        toggleAlbum(albumHeader, albumContent);
+                    }
+                });
+            });
+        }
+
+        // 切換相册展開/摺疊狀態
+        function toggleAlbum(header, content) {
+            const isExpanded = header.getAttribute('aria-expanded') === 'true';
+            header.setAttribute('aria-expanded', !isExpanded);
+            
+            if (isExpanded) {
+                content.classList.remove('active');
+            } else {
+                content.classList.add('active');
+                // 展開後將焦點移至第一張圖片，增強可訪問性
+                const firstImage = content.querySelector('.album-image');
+                if (firstImage) firstImage.focus();
+            }
+        }
+
+        // 打開燈箱
+        function openLightbox(image) {
+            lightboxImage.src = image.path;
+            lightboxImage.alt = image.title;
+            lightboxTitle.textContent = image.title;
+            lightboxDescription.textContent = image.description || '無描述';
+            lightboxDate.textContent = `拍攝日期: ${image.date}`;
+            
+            // 顯示燈箱
+            lightbox.setAttribute('aria-hidden', 'false');
+            closeButton.focus();
+            
+            // 保存當前焦點元素，以便關閉時恢復
+            lightbox.previousFocusedElement = document.activeElement;
+            
+            // 防止背景滾動
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 關閉燈箱
+        function closeLightbox() {
+            lightbox.setAttribute('aria-hidden', 'true');
+            
+            // 恢復背景滾動
+            document.body.style.overflow = '';
+            
+            // 恢復焦點到打開燈箱前的元素
+            if (lightbox.previousFocusedElement) {
+                lightbox.previousFocusedElement.focus();
+            }
+        }
+            // 檢查登入狀態
+    function checkAuth() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const authToken = localStorage.getItem('authToken');
+        
+        if (!isLoggedIn || !authToken) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        try {
+            // 驗證token是否有效
+            const tokenData = JSON.parse(atob(authToken));
+            const currentTime = Date.now();
+            const tokenAge = currentTime - tokenData.timestamp;
+            
+            // Token有效期24小時
+            if (tokenAge > 24 * 60 * 60 * 1000) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userRole');
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+            return false;
+        }
+    }
+
+    // 頁面載入時檢查權限
+    if (!checkAuth()) {
+        // 如果未登入，會自動跳轉到登入頁面
+    }
+    </script>
+</body>
+
+</html>
