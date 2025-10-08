@@ -286,7 +286,7 @@
                 </div>
                 
                 <div class="text-gray-400 text-sm">
-                    &copy; 202525-2026 師生互動平台 - 所有數據存儲在本地瀏覽器中"AI編程顧問""管理員"提供技術支持
+                    &copy; 2025-2026 師生互動平台 - 所有數據存儲在本地瀏覽器中 "AI編程顧問""管理員"提供技術支持
                 </div>
             </div>
         </div>
@@ -300,7 +300,7 @@
         
         // DOM 載入完成後初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化本地存儲 - 為每個帳戶設置不同的密碼
+            // 初始化本地存儲 - 使用固定的帳戶名稱和密碼
             initLocalStorage();
             
             // 生成用戶列表
@@ -550,45 +550,77 @@
             saveMessagesToLocalStorage();
         }
         
-        // 初始化本地存儲 - 為每個帳戶設置不同的密碼
+        // 初始化本地存儲 - 使用固定的帳戶名稱和密碼
         function initLocalStorage() {
+            // 臨時清除舊數據（首次運行後可保留或刪除，避免舊緩存干擾）
+            localStorage.removeItem('users');
+            localStorage.removeItem('messages');
+            localStorage.removeItem('currentUser');
+            
             // 檢查是否有用戶數據，如果沒有則初始化
             if (!localStorage.getItem('users')) {
                 const users = [];
-                
-                // 生成隨機密碼的函數
-                function generateRandomPassword() {
-                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                    let password = '';
-                    for (let i = 0; i < 6; i++) {
-                        password += chars.charAt(Math.floor(Math.random() * chars.length));
-                    }
-                    return password;
-                }
-                
-                // 老師帳號 (生成獨立密碼)
+
+                // 老師帳號 (使用固定密碼)
                 users.push({
                     id: 'teacher',
-                    password: generateRandomPassword(), // 老師的獨立密碼
-                    name: '王老師',
+                    password: "ciYhnt", // 固定的老師密碼
+                    name: '班主任',
                     role: 'teacher',
                     avatar: 'https://picsum.photos/id/1005/100/100'
                 });
-                
-                // 添加33名學生 (每個學生都有不同的密碼)
-                for (let i = 1; i <= 33; i++) {
+
+                // 學生帳號列表（使用固定的學號、名稱和密碼）
+                const studentData = [
+                    { id: "student1", name: "S23044", password: "UU6g6B" },
+                    { id: "student2", name: "S23047", password: "paQs14" },
+                    { id: "student3", name: "S23049", password: "bKSZ4M" },
+                    { id: "student4", name: "S23050", password: "jxueIJ" },
+                    { id: "student5", name: "S23051", password: "2w29uA" },
+                    { id: "student6", name: "S23054", password: "G3yE9c" },
+                    { id: "student7", name: "S22051", password: "TcX8ZM" },
+                    { id: "student8", name: "S23004", password: "BzshzF" },
+                    { id: "student9", name: "S23057", password: "SspHPp" },
+                    { id: "student10", name: "S23058", password: "kGgbyj" },
+                    { id: "student11", name: "S23061", password: "q7W1um" },
+                    { id: "student12", name: "S23062", password: "u8TlUq" },
+                    { id: "student13", name: "S23010", password: "BuF9uV" },
+                    { id: "student14", name: "S23011", password: "P0S0Ty" },
+                    { id: "student15", name: "S23066", password: "Xdu0T9" },
+                    { id: "student16", name: "S23068", password: "x1pXOC" },
+                    { id: "student17", name: "S23018", password: "woxyrT" },
+                    { id: "student18", name: "S23078", password: "pnbXdB" },
+                    { id: "student19", name: "S23079", password: "ghFsM6" },
+                    { id: "student20", name: "S23023", password: "SPFEpV" },
+                    { id: "student21", name: "S23086", password: "mv1ddg" },
+                    { id: "student22", name: "S23091", password: "axMUiz" },
+                    { id: "student23", name: "S23092", password: "fRHLA6" },
+                    { id: "student24", name: "S23099", password: "Y1YEUX" },
+                    { id: "student25", name: "S23029", password: "tsRVkn" },
+                    { id: "student26", name: "S23100", password: "0U4Xek" },
+                    { id: "student27", name: "S23030", password: "qtRpdH" },
+                    { id: "student28", name: "S23106", password: "z8KKHH" },
+                    { id: "student29", name: "S23115", password: "L32dMz" },
+                    { id: "student30", name: "S23117", password: "YJ9vXg" },
+                    { id: "student31", name: "S23119", password: "bO58pR" },
+                    { id: "student32", name: "S23121", password: "cJfJmr" },
+                    { id: "student33", name: "S23121", password: "foCSma" }
+                ];
+
+                // 添加學生帳號到用戶數組
+                studentData.forEach((student, index) => {
                     users.push({
-                        id: `student${i}`,
-                        password: generateRandomPassword(), // 每個學生的獨立密碼
-                        name: `學生${i}`,
+                        id: student.id,
+                        password: student.password,
+                        name: student.name,
                         role: 'student',
-                        avatar: `https://picsum.photos/id/${1010 + i}/100/100`
+                        avatar: `https://picsum.photos/id/${1010 + index}/100/100`
                     });
-                }
-                
+                });
+
                 localStorage.setItem('users', JSON.stringify(users));
             }
-            
+
             // 初始化留言數據（如果不存在）
             if (!localStorage.getItem('messages')) {
                 const initialMessages = [
@@ -597,7 +629,7 @@
                         content: '歡迎大家使用這個互動平台！有任何學習問題都可以在這裡提問。',
                         author: {
                             id: 'teacher',
-                            name: '王老師',
+                            name: '班主任',
                             role: 'teacher',
                             avatar: 'https://picsum.photos/id/1005/100/100'
                         },
@@ -608,7 +640,7 @@
                                 content: '老師，請問下週的作業是什麼？',
                                 author: {
                                     id: 'student1',
-                                    name: '學生1',
+                                    name: 'S23044',
                                     role: 'student',
                                     avatar: 'https://picsum.photos/id/1011/100/100'
                                 },
@@ -620,7 +652,7 @@
                                 content: '下週的作業是完成教材第5章的練習題。',
                                 author: {
                                     id: 'teacher',
-                                    name: '王老師',
+                                    name: '班主任',
                                     role: 'teacher',
                                     avatar: 'https://picsum.photos/id/1005/100/100'
                                 },
@@ -629,7 +661,7 @@
                                     id: '1-1',
                                     content: '老師，請問下週的作業是什麼？',
                                     author: {
-                                        name: '學生1'
+                                        name: 'S23044'
                                     }
                                 }
                             }
@@ -640,7 +672,7 @@
                         content: '大家好，我在學習過程中遇到了一些困難，有人能幫忙解答嗎？',
                         author: {
                             id: 'student5',
-                            name: '學生5',
+                            name: 'S23051',
                             role: 'student',
                             avatar: 'https://picsum.photos/id/1015/100/100'
                         },
