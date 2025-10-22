@@ -17,7 +17,7 @@
             background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
-            padding: 20px;
+            padding: 15px;
         }
         
         .container {
@@ -26,24 +26,25 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            padding: 20px;
         }
         
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             border-bottom: 2px solid #eaeaea;
-            padding-bottom: 20px;
+            padding-bottom: 15px;
         }
         
         h1 {
             color: #2c3e50;
             margin-bottom: 10px;
+            font-size: 1.8rem;
         }
         
         .description {
             color: #7f8c8d;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         
         .legend {
@@ -57,12 +58,12 @@
         .legend-item {
             display: flex;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         
         .legend-color {
-            width: 15px;
-            height: 15px;
+            width: 12px;
+            height: 12px;
             margin-right: 5px;
             border-radius: 3px;
         }
@@ -70,44 +71,49 @@
         .controls {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
             margin-bottom: 20px;
         }
         
         button {
-            padding: 8px 15px;
+            padding: 8px 12px;
             background: #3498db;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             transition: background 0.3s;
+            font-size: 0.9rem;
         }
         
-        button:hover {
+        button:hover, button:active {
             background: #2980b9;
         }
         
         #site-structure {
             width: 100%;
-            height: 600px;
+            height: 500px;
             border: 1px solid #ddd;
             border-radius: 5px;
             overflow: auto;
             background: #f9f9f9;
+            touch-action: manipulation;
         }
         
         .node-details {
-            margin-top: 30px;
-            padding: 20px;
+            margin-top: 25px;
+            padding: 15px;
             background: #f8f9fa;
             border-radius: 5px;
             display: none;
+            font-size: 0.9rem;
         }
         
         .node-details h3 {
             color: #2c3e50;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
         }
         
         .node-details ul {
@@ -115,16 +121,97 @@
         }
         
         .node-details li {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
+        /* 移動端專用樣式 */
+        .mobile-controls {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .mobile-controls button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        /* 響應式設計 */
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
             .container {
                 padding: 15px;
+                border-radius: 8px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .description {
+                font-size: 0.9rem;
             }
             
             #site-structure {
                 height: 400px;
+            }
+            
+            .controls {
+                display: none;
+            }
+            
+            .mobile-controls {
+                display: block;
+            }
+            
+            .legend {
+                gap: 10px;
+            }
+            
+            .legend-item {
+                font-size: 0.8rem;
+            }
+            
+            .node-details {
+                padding: 12px;
+                font-size: 0.85rem;
+            }
+            
+            .node-details h3 {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            #site-structure {
+                height: 350px;
+            }
+            
+            .mobile-controls {
+                bottom: 15px;
+                right: 15px;
+            }
+            
+            .mobile-controls button {
+                width: 45px;
+                height: 45px;
             }
         }
     </style>
@@ -159,6 +246,8 @@
             <button id="zoom-in">放大</button>
             <button id="zoom-out">縮小</button>
             <button id="reset-view">重置視圖</button>
+            <button id="expand-all">展開所有節點</button>
+            <button id="collapse-all">摺疊所有節點</button>
         </div>
         
         <div id="site-structure"></div>
@@ -167,6 +256,13 @@
             <h3 id="detail-title">節點詳情</h3>
             <div id="detail-content"></div>
         </div>
+    </div>
+    
+    <!-- 移動端專用控制按鈕 -->
+    <div class="mobile-controls">
+        <button id="mobile-zoom-in" title="放大">+</button>
+        <button id="mobile-zoom-out" title="縮小">-</button>
+        <button id="mobile-reset" title="重置視圖">↺</button>
     </div>
 
     <!-- 引入D3.js庫 -->
@@ -282,14 +378,16 @@
 
         // 設置尺寸和邊距
         const margin = { top: 20, right: 120, bottom: 20, left: 120 };
-        const width = document.getElementById('site-structure').clientWidth - margin.right - margin.left;
-        const height = document.getElementById('site-structure').clientHeight - margin.top - margin.bottom;
+        const container = document.getElementById('site-structure');
+        const width = container.clientWidth - margin.right - margin.left;
+        const height = container.clientHeight - margin.top - margin.bottom;
 
         // 創建SVG容器
         const svg = d3.select("#site-structure")
             .append("svg")
-            .attr("width", width + margin.right + margin.left)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("viewBox", `0 0 ${width + margin.right + margin.left} ${height + margin.top + margin.bottom}`)
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -388,6 +486,11 @@
             
             content.innerHTML = html;
             detailsDiv.style.display = "block";
+            
+            // 在移動設備上滾動到詳情區域
+            if (window.innerWidth <= 768) {
+                detailsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         // 控制按鈕功能
@@ -403,80 +506,88 @@
             d3.select("#site-structure svg").transition().call(zoom.transform, d3.zoomIdentity);
         });
 
-    document.getElementById("expand-all").addEventListener("click", () => {
-        // 這裡可以實現展開所有節點的功能
-        alert("展開所有節點功能");
-    });
-
-    document.getElementById("collapse-all").addEventListener("click", () => {
-        // 這裡可以實現摺疊所有節點的功能
-        alert("摺疊所有節點功能");
-    });
-
-    // 安全綁定展開/摺疊按鈕，避免找不到元素時拋錯導致整個腳本中斷
-    const expandBtn = document.getElementById("expand-all");
-    const collapseBtn = document.getElementById("collapse-all");
-
-    if (expandBtn) {
-        expandBtn.addEventListener("click", () => {
-            // 這裡可以實現展開所有節點的功能
+        document.getElementById("expand-all").addEventListener("click", () => {
             alert("展開所有節點功能");
         });
-    }
 
-    if (collapseBtn) {
-        collapseBtn.addEventListener("click", () => {
-            // 這裡可以實現摺疊所有節點的功能
+        document.getElementById("collapse-all").addEventListener("click", () => {
             alert("摺疊所有節點功能");
         });
-    }
+        
+        // 移動端控制按鈕功能
+        document.getElementById("mobile-zoom-in").addEventListener("click", () => {
+            d3.select("#site-structure svg").transition().call(zoom.scaleBy, 1.5);
+        });
 
-    // 檢查登入狀態
-    function checkAuth() {
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        const authToken = localStorage.getItem('authToken');
+        document.getElementById("mobile-zoom-out").addEventListener("click", () => {
+            d3.select("#site-structure svg").transition().call(zoom.scaleBy, 0.75);
+        });
 
-        // 正確判斷 isLoggedIn（localStorage 存的是字串）
-        if (isLoggedIn !== 'true' || !authToken) {
-            window.location.href = 'login.html';
-            return false;
+        document.getElementById("mobile-reset").addEventListener("click", () => {
+            d3.select("#site-structure svg").transition().call(zoom.transform, d3.zoomIdentity);
+        });
+
+        // 安全綁定展開/摺疊按鈕，避免找不到元素時拋錯導致整個腳本中斷
+        const expandBtn = document.getElementById("expand-all");
+        const collapseBtn = document.getElementById("collapse-all");
+
+        if (expandBtn) {
+            expandBtn.addEventListener("click", () => {
+                // 這裡可以實現展開所有節點的功能
+                alert("展開所有節點功能");
+            });
         }
 
-        try {
-            const decoded = atob(authToken);
-            const tokenData = JSON.parse(decoded);
+        if (collapseBtn) {
+            collapseBtn.addEventListener("click", () => {
+                // 這裡可以實現摺疊所有節點的功能
+                alert("摺疊所有節點功能");
+            });
+        }
 
-            // 支援 timestamp 為字串或數字
-            const tokenTimestamp = Number(tokenData.timestamp);
-            if (Number.isNaN(tokenTimestamp)) throw new Error('invalid timestamp');
+        // 檢查登入狀態
+        function checkAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const authToken = localStorage.getItem('authToken');
 
-            const currentTime = Date.now();
-            const tokenAge = currentTime - tokenTimestamp;
+            // 正確判斷 isLoggedIn（localStorage 存的是字串）
+            if (isLoggedIn !== 'true' || !authToken) {
+                window.location.href = 'login.html';
+                return false;
+            }
 
-            // Token 有效期 24 小時
-            if (tokenAge > 24 * 60 * 60 * 1000) {
+            try {
+                const decoded = atob(authToken);
+                const tokenData = JSON.parse(decoded);
+
+                // 支援 timestamp 為字串或數字
+                const tokenTimestamp = Number(tokenData.timestamp);
+                if (Number.isNaN(tokenTimestamp)) throw new Error('invalid timestamp');
+
+                const currentTime = Date.now();
+                const tokenAge = currentTime - tokenTimestamp;
+
+                // Token 有效期 24 小時
+                if (tokenAge > 24 * 60 * 60 * 1000) {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userRole');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+
+                return true;
+            } catch (error) {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('userRole');
                 window.location.href = 'login.html';
                 return false;
             }
-
-            return true;
-        } catch (error) {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('userRole');
-            window.location.href = 'login.html';
-            return false;
         }
-    }
 
-    // 頁面載入時立即檢查權限
-    checkAuth();
+        // 頁面載入時立即檢查權限
+        checkAuth();
     </script>
 </body>
-
 </html>
-
-
