@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/icons/icon.png" sizes="16x16" type="image/png">
+    <title>網站結構圖 - KYWC_3D班網</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 8px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        #site-structure {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: auto;
+            background: #f9f9f9;
+        }
+        
+        .node-details {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .node-details h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .node-details ul {
+            padding-left: 20px;
+        }
+        
+        .node-details li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            #site-structure {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>KYWC_3D班網 - 網站結構圖</h1>
+            <p class="description">點擊下方節點查看詳細信息，使用控制按鈕調整視圖</p>
+        </header>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #3498db;"></div>
+                <span>主頁面</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #2ecc71;"></div>
+                <span>內容頁面</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e74c3c;"></div>
+                <span>特殊頁面</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f39c12;"></div>
+                <span>功能頁面</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="zoom-in">放大</button>
+            <button id="zoom-out">縮小</button>
+            <button id="reset-view">重置視圖</button>
+        </div>
+        
+        <div id="site-structure"></div>
+        
+        <div class="node-details" id="node-details">
+            <h3 id="detail-title">節點詳情</h3>
+            <div id="detail-content"></div>
+        </div>
+    </div>
+
+    <!-- 引入D3.js庫 -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <script>
+        // 網站結構數據
+        const siteData = {
+            name: "KYWC_3D班網",
+            children: [
+                {
+                    name: "首頁 (index.html)",
+                    type: "main",
+                    children: [
+                        {
+                            name: "快速鏈接",
+                            children: [
+                                { name: "學習資源 (鏈接至resources.html)", type: "content" },
+                                { name: "班級相簿 (鏈接至gallery.html)", type: "content" },
+                                { name: "班級日曆 (鏈接至calendar.html)", type: "content"},
+                                { name: "學校資訊 (鏈接至info.html)", type: "content" },
+                                { name: "關於我們 (鏈接至about.html)", type: "content" }
+                            ]
+                        },
+                        
+                    ]
+                },
+                {
+                    name: "學校資訊 (info.html)",
+                    type: "main",
+                    children: [
+                        {
+                            name: "學校基本信息",
+                            children: [
+                                { name: "地區、校長、辦學團體等", type: "content" },
+                                { name: "聯絡電話等聯繫方式", type: "content" }
+                            ]
+                        },
+                        {
+                            name: "最新消息",
+                            children: [
+                                { name: "行政架構圖", type: "content" },
+                                { name: "行政架構總表", type: "content" },
+                                { name: "特別室及課室分佈圖", type: "content" },
+                                { name: "班主任名單", type: "content" },
+                                { name: "校曆表", type: "content" }
+                            ]
+                        },
+                        {
+                            name: "校園設施",
+                            children: [
+                                { name: "禮堂、校史館、音樂室等", type: "content" },
+                                { name: "視覺藝術室、圖書館、電腦學習室等", type: "content" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "學習資源庫 (resources.html)",
+                    type: "function",
+                    children: [
+                        { name: "搜尋區", type: "function" },
+                        {
+                            name: "資源分類",
+                            children: [
+                                { name: "數學公式大全", type: "content" },
+                                { name: "英文單字表", type: "content" },
+                                { name: "科學實驗指南", type: "content" },
+                                { name: "歷史時間線", type: "content" },
+                                { name: "語文閱讀材料", type: "content" },
+                                { name: "化學元素表", type: "content" },
+                                { name: "數學題庫", type: "content" },
+                                { name: "英文文法指南", type: "content" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "班級相簿 (gallery.html)",
+                    type: "function",
+                    children: [
+                        { name: "相册介紹", type: "content" },
+                        { name: "篩選按鈕", type: "content" },
+                        { name: "圖片資料庫", type: "content" }
+                    ]
+                },
+                {
+                    name: "關於我們 (about.html)",
+                    type: "main",
+                    children: [
+                        {
+                            name: "聯繫信息",
+                            children: [
+                                { name: "電子郵件、電話、地址等", type: "content" },
+                                { name: "辦公時間", type: "content" }
+                            ]
+                        },
+                        { name: "學校位置地圖", type: "content" },
+                        { name: "班會幹事 (committee.html)", type: "content" },
+                    ]
+                },
+                {
+                    name: "我的編程自學之路 (me.html)",
+                    type: "special",
+                    children: [
+                        { name: "時間線（各階段學習經歷）", type: "content" },
+                        { name: "技能水平（HTML、CSS、JavaScript等）", type: "content" },
+                        { name: "專案作品（KYWC_3D班網）", type: "content" }
+                    ]
+                }
+            ]
+        };
+
+        // 設置尺寸和邊距
+        const margin = { top: 20, right: 120, bottom: 20, left: 120 };
+        const width = document.getElementById('site-structure').clientWidth - margin.right - margin.left;
+        const height = document.getElementById('site-structure').clientHeight - margin.top - margin.bottom;
+
+        // 創建SVG容器
+        const svg = d3.select("#site-structure")
+            .append("svg")
+            .attr("width", width + margin.right + margin.left)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // 創建縮放行為
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .on("zoom", (event) => {
+                svg.attr("transform", event.transform);
+            });
+
+        d3.select("#site-structure svg").call(zoom);
+
+        // 創建樹狀佈局
+        const treeLayout = d3.tree().size([height, width]);
+
+        // 層次化數據
+        const root = d3.hierarchy(siteData);
+        treeLayout(root);
+
+        // 顏色映射
+        const colorScale = d3.scaleOrdinal()
+            .domain(["main", "content", "special", "function"])
+            .range(["#3498db", "#2ecc71", "#e74c3c", "#f39c12"]);
+
+        // 添加連接線
+        svg.selectAll(".link")
+            .data(root.links())
+            .enter()
+            .append("path")
+            .attr("class", "link")
+            .attr("d", d3.linkHorizontal()
+                .x(d => d.y)
+                .y(d => d.x))
+            .style("fill", "none")
+            .style("stroke", "#ccc")
+            .style("stroke-width", 2);
+
+        // 添加節點組
+        const node = svg.selectAll(".node")
+            .data(root.descendants())
+            .enter()
+            .append("g")
+            .attr("class", "node")
+            .attr("transform", d => `translate(${d.y},${d.x})`)
+            .on("click", function(event, d) {
+                // 顯示節點詳情
+                showNodeDetails(d);
+            });
+
+        // 添加節點圓圈
+        node.append("circle")
+            .attr("r", 8)
+            .style("fill", d => colorScale(d.data.type || "content"))
+            .style("stroke", "#fff")
+            .style("stroke-width", 2);
+
+        // 添加節點標籤
+        node.append("text")
+            .attr("dy", 3)
+            .attr("x", d => d.children ? -12 : 12)
+            .style("text-anchor", d => d.children ? "end" : "start")
+            .style("font-size", "12px")
+            .text(d => d.data.name);
+
+        // 顯示節點詳情的函數
+        function showNodeDetails(node) {
+            const detailsDiv = document.getElementById("node-details");
+            const title = document.getElementById("detail-title");
+            const content = document.getElementById("detail-content");
+            
+            title.textContent = node.data.name;
+            
+            let html = "";
+            
+            if (node.children) {
+                html += "<p><strong>子節點:</strong></p><ul>";
+                node.children.forEach(child => {
+                    html += `<li>${child.data.name}</li>`;
+                });
+                html += "</ul>";
+            }
+            
+            if (node.parent && node.parent.data.name !== "KYWC_3D班網") {
+                html += `<p><strong>父節點:</strong> ${node.parent.data.name}</p>`;
+            }
+            
+            if (node.data.type) {
+                const typeNames = {
+                    "main": "主頁面",
+                    "content": "內容頁面",
+                    "special": "特殊頁面",
+                    "function": "功能頁面"
+                };
+                html += `<p><strong>頁面類型:</strong> ${typeNames[node.data.type]}</p>`;
+            }
+            
+            content.innerHTML = html;
+            detailsDiv.style.display = "block";
+        }
+
+        // 控制按鈕功能
+        document.getElementById("zoom-in").addEventListener("click", () => {
+            d3.select("#site-structure svg").transition().call(zoom.scaleBy, 1.5);
+        });
+
+        document.getElementById("zoom-out").addEventListener("click", () => {
+            d3.select("#site-structure svg").transition().call(zoom.scaleBy, 0.75);
+        });
+
+        document.getElementById("reset-view").addEventListener("click", () => {
+            d3.select("#site-structure svg").transition().call(zoom.transform, d3.zoomIdentity);
+        });
+
+    document.getElementById("expand-all").addEventListener("click", () => {
+        // 這裡可以實現展開所有節點的功能
+        alert("展開所有節點功能");
+    });
+
+    document.getElementById("collapse-all").addEventListener("click", () => {
+        // 這裡可以實現摺疊所有節點的功能
+        alert("摺疊所有節點功能");
+    });
+
+    // 安全綁定展開/摺疊按鈕，避免找不到元素時拋錯導致整個腳本中斷
+    const expandBtn = document.getElementById("expand-all");
+    const collapseBtn = document.getElementById("collapse-all");
+
+    if (expandBtn) {
+        expandBtn.addEventListener("click", () => {
+            // 這裡可以實現展開所有節點的功能
+            alert("展開所有節點功能");
+        });
+    }
+
+    if (collapseBtn) {
+        collapseBtn.addEventListener("click", () => {
+            // 這裡可以實現摺疊所有節點的功能
+            alert("摺疊所有節點功能");
+        });
+    }
+
+    // 檢查登入狀態
+    function checkAuth() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const authToken = localStorage.getItem('authToken');
+
+        // 正確判斷 isLoggedIn（localStorage 存的是字串）
+        if (isLoggedIn !== 'true' || !authToken) {
+            window.location.href = 'login.html';
+            return false;
+        }
+
+        try {
+            const decoded = atob(authToken);
+            const tokenData = JSON.parse(decoded);
+
+            // 支援 timestamp 為字串或數字
+            const tokenTimestamp = Number(tokenData.timestamp);
+            if (Number.isNaN(tokenTimestamp)) throw new Error('invalid timestamp');
+
+            const currentTime = Date.now();
+            const tokenAge = currentTime - tokenTimestamp;
+
+            // Token 有效期 24 小時
+            if (tokenAge > 24 * 60 * 60 * 1000) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userRole');
+                window.location.href = 'login.html';
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+            return false;
+        }
+    }
+
+    // 頁面載入時立即檢查權限
+    checkAuth();
+    </script>
+</body>
+
+</html>

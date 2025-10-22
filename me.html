@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的編程自學之路</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="icon" href="images\fa-code.png" sizes="16x16" type="image/png">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#8b5cf6',
+                        accent: '#10b981',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        serif: ['Georgia', 'serif']
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .text-gradient {
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+            }
+            .timeline-line {
+                width: 4px;
+                background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 text-slate-800 dark:text-slate-200 min-h-screen transition-colors duration-300">
+    <!-- 導航列 -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-gradient bg-gradient-to-r from-primary to-secondary">
+                <i class="fa fa-code mr-2"></i>我的編程之路
+            </h1>
+            <nav>
+             <ul class="nav-links">
+                <li><a href="index.html"></i>回首頁</a></li>
+                <li id="user-info"></li>
+             </ul>
+        </div>
+    </header>
+
+    <!-- 主要內容 -->
+    <main class="container mx-auto px-4 py-8 md:py-16">
+        <!-- 英雄區域 -->
+        <section class="mb-16 md:mb-24 text-center">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-shadow">
+                從<span class="text-gradient bg-gradient-to-r from-primary to-secondary">HTML都拼不全</span>到<span class="text-gradient bg-gradient-to-r from-secondary to-accent">獨立編寫網站</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
+                一段始於偶然"誤點"的編程自學之旅，見證一個男孩的成長與蛻變
+            </p>
+            <div class="mt-10 flex justify-center">
+                <a href="#timeline" class="animate-bounce bg-white dark:bg-slate-800 p-3 rounded-full shadow-md">
+                    <i class="fa fa-chevron-down text-primary"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- 時間線 -->
+        <section id="timeline" class="max-w-4xl mx-auto">
+            <!-- 六年級 -->
+            <div class="mb-16 md:mb-24">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/2 order-2 md:order-1">
+                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 md:p-8 card-hover">
+                            <div class="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900 text-primary rounded-full text-sm font-medium mb-4">
+                                六年級
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-4">偶然的"誤點"</h2>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4">
+                                電腦課的自由操作時間，本想找個平台做讀書報告，卻誤點了"Google Sites"。拖曳式介面讓我驚訝——原來不需要寫複雜程式，像堆積木一樣就能拼出自己的網頁。
+                            </p>
+                            <p class="text-slate-600 dark:text-slate-400">
+                                我為班上的科學展項目做了第一個網站，雖然只是簡單的文字和圖片排列，但當同學們驚嘆時，那種成就感點燃了我對網頁製作的好奇心。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-line h-24 md:h-auto md:w-12 flex justify-center items-start md:items-center order-1 md:order-2">
+                        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg z-10">
+                            <i class="fa fa-mouse-pointer"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 hidden md:block">
+                        <img src="https://picsum.photos/id/0/600/400" alt="Google Sites拖曳式介面示例" class="rounded-xl shadow-lg w-full h-auto object-cover">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 初一暑假 -->
+            <div class="mb-16 md:mb-24">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/2 hidden md:block">
+                        <img src="https://picsum.photos/id/160/600/400" alt="網頁原始碼查看介面" class="rounded-xl shadow-lg w-full h-auto object-cover">
+                    </div>
+                    <div class="timeline-line h-24 md:h-auto md:w-12 flex justify-center items-start md:items-center">
+                        <div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center shadow-lg z-10">
+                            <i class="fa fa-code"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 md:p-8 card-hover">
+                            <div class="inline-block px-3 py-1 bg-purple-100 dark:bg-purple-900 text-secondary rounded-full text-sm font-medium mb-4">
+                                初一暑假
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-4">揭開神秘面紗</h2>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4">
+                                我決定了解網站背後的秘密。右鍵點擊"檢視網頁原始碼"，螢幕上密密麻麻的&lt;div&gt;、&lt;class&gt;讓我眼花繚亂，卻也恍然大悟——原來Google Sites那些拖曳方塊的背後，是這些精密程式碼在運作。
+                            </p>
+                            <p class="text-slate-600 dark:text-slate-400">
+                                我的第一個HTML檔案是用記事本寫的，存檔時還不小心存成了.txt格式。當終於在瀏覽器看到標題正確顯示時，我激動地拍桌而起。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 初二上學期 -->
+            <div class="mb-16 md:mb-24">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/2 order-2 md:order-1">
+                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 md:p-8 card-hover">
+                            <div class="inline-block px-3 py-1 bg-green-100 dark:bg-green-900 text-accent rounded-full text-sm font-medium mb-4">
+                                初二上學期
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-4">第一個"撞牆期"</h2>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4">
+                                CSS的盒模型讓我困惑不已——為什麼設定的寬度總是不聽話？為了理解display: flex，我整整花了三個週末，對著教學影片反覆暫停、重播。
+                            </p>
+                            <p class="text-slate-600 dark:text-slate-400">
+                                記得有天晚上十一點，當導航列終於完美水平排列時，我忍不住在房間裡小小歡呼，雖然換來了媽媽的一句"這麼晚還不睡"。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-line h-24 md:h-auto md:w-12 flex justify-center items-start md:items-center order-1 md:order-2">
+                        <div class="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center shadow-lg z-10">
+                            <i class="fa fa-cubes"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 hidden md:block">
+                        <img src="https://picsum.photos/id/180/600/400" alt="CSS佈局挑戰示意圖" class="rounded-xl shadow-lg w-full h-auto object-cover">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 初二下學期 - KYWC_3D班網 -->
+            <div class="mb-16 md:mb-24">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/2 hidden md:block">
+                        <img src="https://images.unsplash.com/photo-1546410531-bb4caa6b424d?ixlib=rb-4.0.3" alt="KYWC_3D班網介面展示" class="rounded-xl shadow-lg w-full h-auto object-cover">
+                    </div>
+                    <div class="timeline-line h-24 md:h-auto md:w-12 flex justify-center items-start md:items-center">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-accent to-secondary text-white flex items-center justify-center shadow-lg z-10">
+                            <i class="fa fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 md:p-8 card-hover">
+                            <div class="inline-block px-3 py-1 bg-gradient-to-r from-green-100 to-purple-100 dark:from-green-900 dark:to-purple-900 text-gradient bg-gradient-to-r from-accent to-secondary rounded-full text-sm font-medium mb-4">
+                                初二下學期
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-4">第一個完整專案：KYWC_3D班網</h2>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4">
+                                將所學的HTML、CSS和JavaScript知識整合，為班級打造了一個專屬網站。從設計到實現，從響應式佈局到無障礙設計，每一個細節都經過精心打磨。
+                            </p>
+                            <p class="text-slate-600 dark:text-slate-400">
+                                這個專案讓我真正理解了前端開發的全流程：使用者體驗設計、響應式適配、無障礙存取、效能優化。看到同學和老師們實際使用我開發的網站，那種成就感是前所未有的。
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">HTML5</span>
+                                <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded text-xs">CSS3</span>
+                                <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-xs">JavaScript</span>
+                                <span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded text-xs">響應式設計</span>
+                                <span class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded text-xs">無障礙設計</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 現在與未來 -->
+            <div class="mb-16 md:mb-24">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/2 order-2 md:order-1">
+                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 md:p-8 card-hover">
+                            <div class="inline-block px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-gradient bg-gradient-to-r from-primary to-secondary rounded-full text-sm font-medium mb-4">
+                                現在與未來
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-4">持續進化的旅程</h2>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4">
+                                從靜態頁面到加入JavaScript互動效果，從單一網頁到多頁面網站，每個突破都建立在上一個階段的積累上。KYWC_3D班網的開發讓我對使用者體驗和無障礙設計有了更深的理解。
+                            </p>
+                            <p class="text-slate-600 dark:text-slate-400">
+                                下一站，是學習React框架，是探索後端開發。如果你也正在自學的路上，從第一個"Hello World"開始吧，每個令人驚嘆的網站，都始於某個孩子好奇地點選"檢視原始碼"的那一瞬間。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-line h-24 md:h-auto md:w-12 flex justify-center items-start md:items-center order-1 md:order-2">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary text-white flex items-center justify-center shadow-lg z-10">
+                            <i class="fa fa-rocket"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 hidden md:block">
+                        <img src="https://picsum.photos/id/119/600/400" alt="編程學習的未來展望" class="rounded-xl shadow-lg w-full h-auto object-cover">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 感悟部分 -->
+        <section class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 md:p-10 mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-center">編程教會我的事</h2>
+            <div class="space-y-4 text-slate-600 dark:text-slate-400">
+                <p>從六年級到現在，編程教會我的遠不止技術。它讓我學會將大問題拆解成小步驟，讓我在數學課上看到邏輯的美，在美術課上理解設計的重要性。</p>
+                <p>開發KYWC_3D班網的經歷讓我明白，好的程式碼不僅要能執行，更要考慮使用者體驗和無障礙存取。每一個細節都影響著使用者的使用感受。</p>
+                <p class="font-medium text-center mt-6 text-lg">
+                    更重要的是，它讓我明白——創造不需要等待許可，只要有一台電腦和求知的心，任何人都能成為數位世界的建造者。
+                </p>
+            </div>
+        </section>
+
+        <!-- 技能展示 -->
+        <section class="max-w-4xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold mb-10 text-center">我的技能成長</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-html5 text-2xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">HTML</h3>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 mb-2">
+                        <div class="bg-primary h-2.5 rounded-full" style="width: 95%"></div>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">從基礎標籤到語意化結構</p>
+                </div>
+                
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-css3 text-2xl text-secondary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">CSS</h3>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 mb-2">
+                        <div class="bg-secondary h-2.5 rounded-full" style="width: 85%"></div>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">從簡單樣式到響應式設計</p>
+                </div>
+                
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-code text-2xl text-accent"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">JavaScript</h3>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 mb-2">
+                        <div class="bg-accent h-2.5 rounded-full" style="width: 75%"></div>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">從基礎互動到動態效果</p>
+                </div>
+            </div>
+            
+            <!-- 新增技能卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-mobile text-2xl text-yellow-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">響應式設計</h3>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 mb-2">
+                        <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 80%"></div>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">行動裝置優先設計理念</p>
+                </div>
+                
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-universal-access text-2xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">無障礙設計</h3>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 mb-2">
+                        <div class="bg-indigo-500 h-2.5 rounded-full" style="width: 70%"></div>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">WCAG標準與ARIA標籤</p>
+                </div>
+                
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-users text-2xl text-pink-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">專案規劃</h3>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 mb-2">
+                        <div class="bg-pink-500 h-2.5 rounded-full" style="width: 65%"></div>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">從需求分析到部署上線</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 專案展示 -->
+        <section class="max-w-4xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold mb-10 text-center">我的專案作品</h2>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                <div class="md:flex">
+                    <div class="md:w-1/3">
+                        <img src="images/me_p.png" alt="KYWC_3D班網專案展示" class="w-full h-64 md:h-full object-cover">
+                    </div>
+                    <div class="p-8 md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-4 text-gradient bg-gradient-to-r from-primary to-secondary">KYWC_3D班網</h3>
+                        <p class="text-slate-600 dark:text-slate-400 mb-4">
+                            一個為香港元朗天水圍中學3D班設計的專屬班級網站，提供集中化的平台方便師生交流、資源共享和班級管理。
+                        </p>
+                        <div class="mb-4">
+                            <h4 class="font-bold mb-2">專案特點：</h4>
+                            <ul class="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-1">
+                                <li>完整的無障礙支援，符合WCAG標準</li>
+                                <li>響應式設計，適配各種裝置</li>
+                                <li>直觀的使用者介面與清晰的視覺層級</li>
+                                <li>前端身份驗證與安全機制</li>
+                            </ul>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">HTML5</span>
+                            <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm">CSS3</span>
+                            <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">JavaScript</span>
+                            <span class="px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm">響應式設計</span>
+                        </div>
+                        <a href="index.html" class="inline-flex items-center btn bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-lg transition-all hover:scale-105">
+                            <i class="fa fa-external-link mr-2"></i>檢視專案詳情
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="bg-white dark:bg-slate-800 shadow-inner py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-slate-600 dark:text-slate-400 mb-4">
+                我的編程之旅才剛啟航，期待未來更多精彩
+            </p>
+            <div class="flex justify-center space-x-4 mb-6">
+                <a href="#" class="text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors">
+                    <i class="fa fa-github text-xl"></i>
+                </a>
+                <a href="#" class="text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors">
+                    <i class="fa fa-codepen text-xl"></i>
+                </a>
+                <a href="#" class="text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors">
+                    <i class="fa fa-globe text-xl"></i>
+                </a>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-500">
+                &copy; 2023 我的編程自學之路 | 用程式碼記錄成長
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 平滑滾動
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // 滾動時導航列效果
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('py-2');
+                header.classList.remove('py-4');
+            } else {
+                header.classList.add('py-4');
+                header.classList.remove('py-2');
+            }
+        });
+
+        // 為時間線新增滾動動畫
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-8');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-8');
+            observer.observe(card);
+        });
+    </script>
+</body>
+
+</html>

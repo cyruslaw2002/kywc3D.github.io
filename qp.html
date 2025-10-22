@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>師生互動平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="icon" href="images\Qp_img.png" sizes="16x16" type="image/png">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        teacher: '#3b82f6', // 老師主題色：藍色
+                        student: '#10b981', // 學生主題色：綠色
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+            .message-appear {
+                animation: fadeIn 0.3s ease forwards;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .modal-enter {
+                animation: modalIn 0.3s ease forwards;
+            }
+            @keyframes modalIn {
+                from { opacity: 0; transform: scale(0.95); }
+                to { opacity: 1; transform: scale(1); }
+            }
+            .animate-shake {
+                animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            }
+            @keyframes shake {
+                10%, 90% { transform: translateX(-1px); }
+                20%, 80% { transform: translateX(2px); }
+                30%, 50%, 70% { transform: translateX(-3px); }
+                40%, 60% { transform: translateX(3px); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen flex flex-col">
+    <!-- 頂部導航欄 -->
+    <header id="navbar" class="bg-white shadow-md transition-all duration-300 fixed w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-comments text-teacher text-2xl"></i>
+                <h1 class="text-xl font-bold text-teacher">師生互動平台</h1>
+            </div>
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="#users" class="nav-link font-medium hover:text-teacher transition-colors">用戶列表</a>
+                <a href="#messages" class="nav-link font-medium hover:text-teacher transition-colors">留言區</a>
+            </nav>
+            <div id="user-status" class="hidden items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <img id="nav-avatar" src="" alt="用戶頭像" class="w-8 h-8 rounded-full object-cover border-2">
+                    <span id="nav-username" class="font-medium hidden md:inline-block"></span>
+                    <span id="nav-role" class="text-xs px-2 py-1 rounded-full"></span>
+                </div>
+                <button id="logout-btn" class="text-gray-600 hover:text-red-500 transition-colors">
+                    <i class="fa fa-sign-out"></i>
+                </button>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden text-gray-600 focus:outline-none">
+                <i class="fa fa-bars text-xl"></i>
+            </button>
+        </div>
+        <!-- 移動端選單 -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-100">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#users" class="py-2 font-medium hover:text-teacher transition-colors">用戶列表</a>
+                <a href="#messages" class="py-2 font-medium hover:text-teacher transition-colors">留言區</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main class="flex-grow pt-16">
+        <!-- 歡迎區域 -->
+        <section id="welcome" class="bg-gradient-to-r from-teacher to-student text-white py-16 md:py-24">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-[clamp(1.8rem,4vw,3rem)] font-bold mb-4">
+                    歡迎來到師生互動平台
+                </h2>
+                <p id="welcome-message" class="text-[clamp(1rem,2vw,1.25rem)] max-w-2xl mx-auto opacity-90 mb-8">
+                    請從下方用戶列表中選擇您的身份並輸入密碼登入
+                </p>
+                <div id="login-prompt" class="hidden">
+                    <p class="mb-6">您已登入為: <span id="logged-in-as" class="font-bold"></span></p>
+                    <button id="go-to-messages" class="bg-white text-teacher font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                        進入留言區
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 用戶列表 -->
+        <section id="users" class="py-12 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-800 mb-3">用戶列表</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">每個帳戶都有獨立密碼，請點擊卡片並輸入密碼登入</p>
+                </div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <!-- 用戶卡片將通過JS動態生成 -->
+                </div>
+            </div>
+        </section>
+        
+        <!-- 密碼輸入模態框 -->
+        <div id="password-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-95 opacity-0" id="password-modal-content">
+                <div class="p-6 md:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800">請輸入密碼</h3>
+                        <button id="close-password-modal" class="text-gray-500 hover:text-gray-700 transition-colors">
+                            <i class="fa fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4 text-center">
+                        <img id="password-user-avatar" src="" alt="用戶頭像" class="w-16 h-16 rounded-full mx-auto mb-2">
+                        <h4 id="password-user-name" class="font-bold text-gray-800"></h4>
+                        <p id="password-user-role" class="text-xs px-2 py-1 rounded-full inline-block mt-1"></p>
+                    </div>
+                    
+                    <form id="password-form" class="space-y-4">
+                        <input type="hidden" id="target-user-id" value="">
+                        
+                        <div>
+                            <label for="user-password" class="block text-sm font-medium text-gray-700 mb-1">密碼</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="user-password" name="user-password" required
+                                    class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm focus:border-teacher focus:ring focus:ring-teacher focus:ring-opacity-50 py-3 border"
+                                    placeholder="請輸入您的密碼">
+                                <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" 
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-teacher hover:bg-teacher/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teacher transition-colors">
+                            登入
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 留言區 -->
+        <section id="messages" class="py-12 bg-gray-50 hidden">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-800 mb-3">留言互動區</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">在這裡與老師和同學交流想法、提問和分享知識</p>
+                </div>
+                
+                <!-- 發布新留言 -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <div class="flex space-x-4">
+                        <img id="new-message-avatar" src="" alt="當前用戶頭像" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                        <div class="flex-grow">
+                            <textarea id="new-message-content" rows="3" 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teacher/50 resize-none"
+                                placeholder="分享您的想法..."></textarea>
+                            <div class="flex justify-end mt-3">
+                                <button id="send-message-btn" class="bg-teacher hover:bg-teacher/90 text-white px-4 py-2 rounded-lg flex items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fa fa-paper-plane mr-2"></i> 發送
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 留言列表 -->
+                <div id="messages-container" class="space-y-6">
+                    <!-- 留言將通過JavaScript動態生成 -->
+                </div>
+                
+                <!-- 載入更多 -->
+                <div class="text-center mt-8">
+                    <button id="load-more-btn" class="border border-gray-300 bg-white text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        載入更多
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 回覆框模板 -->
+    <div id="reply-template" class="hidden">
+        <div class="mt-3 pl-14">
+            <div class="flex space-x-3">
+                <img class="reply-avatar w-8 h-8 rounded-full object-cover flex-shrink-0" src="" alt="當前用戶頭像">
+                <div class="flex-grow">
+                    <textarea class="reply-content w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teacher/50 resize-none"
+                        rows="2" placeholder="回覆..."></textarea>
+                    <div class="flex justify-end mt-2 space-x-2">
+                        <button class="cancel-reply text-sm text-gray-500 hover:text-gray-700 px-3 py-1">取消</button>
+                        <button class="send-reply text-sm bg-teacher hover:bg-teacher/90 text-white px-3 py-1 rounded transition-colors">發送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引用回覆框模板 -->
+    <div id="quote-reply-template" class="hidden">
+        <div class="mt-3 pl-14">
+            <div class="flex space-x-3">
+                <img class="quote-reply-avatar w-8 h-8 rounded-full object-cover flex-shrink-0" src="" alt="當前用戶頭像">
+                <div class="flex-grow">
+                    <div class="bg-gray-50 p-2 rounded text-sm border border-gray-200 mb-2">
+                        <div class="flex items-center text-gray-500 mb-1">
+                            <span class="quote-author font-medium"></span>
+                            <span class="mx-1">:</span>
+                            <button class="remove-quote ml-auto text-gray-400 hover:text-gray-600">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <p class="quote-content text-gray-600"></p>
+                    </div>
+                    <textarea class="quote-reply-content w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teacher/50 resize-none"
+                        rows="2" placeholder="回覆..."></textarea>
+                    <div class="flex justify-end mt-2 space-x-2">
+                        <button class="cancel-quote-reply text-sm text-gray-500 hover:text-gray-700 px-3 py-1">取消</button>
+                        <button class="send-quote-reply text-sm bg-teacher hover:bg-teacher/90 text-white px-3 py-1 rounded transition-colors">發送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知提示 -->
+    <div id="notification" class="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 transform translate-y-20 opacity-0 transition-all duration-300 max-w-sm z-50">
+        <div class="flex items-start">
+            <div id="notification-icon" class="mr-3 text-green-500">
+                <i class="fa fa-check-circle text-xl"></i>
+            </div>
+            <div class="flex-grow">
+                <h4 id="notification-title" class="font-bold text-gray-800"></h4>
+                <p id="notification-message" class="text-sm text-gray-600 mt-1"></p>
+            </div>
+            <button id="close-notification" class="text-gray-400 hover:text-gray-600 ml-2">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 頁腳 -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa fa-comments text-teacher text-xl"></i>
+                        <h2 class="text-lg font-bold">師生互動平台</h2>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-2">促進師生交流，共建良好學習氛圍</p>
+                </div>
+                
+                <div class="text-gray-400 text-sm">
+                    &copy; 2025-2026 師生互動平台 - 所有數據存儲在本地瀏覽器中 "AI編程顧問""管理員"提供技術支持
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 全局變數
+        let currentUser = null;
+        let messages = [];
+        let displayedMessages = 10; // 每次顯示的留言數量
+        
+        // DOM 載入完成後初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化本地存儲 - 使用固定的帳戶名稱和密碼
+            initLocalStorage();
+            
+            // 生成用戶列表
+            generateUserList();
+            
+            // 檢查是否有已登入用戶
+            checkLoggedInUser();
+            
+            // 導航欄滾動效果
+            window.addEventListener('scroll', function() {
+                const navbar = document.getElementById('navbar');
+                if (window.scrollY > 10) {
+                    navbar.classList.add('py-2', 'shadow-lg');
+                    navbar.classList.remove('py-3', 'shadow-md');
+                } else {
+                    navbar.classList.add('py-3', 'shadow-md');
+                    navbar.classList.remove('py-2', 'shadow-lg');
+                }
+            });
+            
+            // 移動端選單切換
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+                if (mobileMenuBtn.querySelector('i').classList.contains('fa-bars')) {
+                    mobileMenuBtn.querySelector('i').classList.replace('fa-bars', 'fa-times');
+                } else {
+                    mobileMenuBtn.querySelector('i').classList.replace('fa-times', 'fa-bars');
+                }
+            });
+            
+            // 密碼模態框控制
+            const passwordModal = document.getElementById('password-modal');
+            const passwordModalContent = document.getElementById('password-modal-content');
+            const closePasswordModal = document.getElementById('close-password-modal');
+            const passwordForm = document.getElementById('password-form');
+            const togglePassword = document.getElementById('toggle-password');
+            const userPassword = document.getElementById('user-password');
+            
+            // 顯示密碼模態框的函數
+            window.openPasswordModal = function() {
+                passwordModal.classList.remove('hidden');
+                setTimeout(() => {
+                    passwordModalContent.classList.remove('scale-95', 'opacity-0');
+                    passwordModalContent.classList.add('scale-100', 'opacity-100');
+                }, 10);
+                // 聚焦密碼輸入框
+                setTimeout(() => {
+                    userPassword.focus();
+                }, 300);
+            }
+            
+            // 關閉密碼模態框的函數
+            function closePasswordModalFunc() {
+                passwordModalContent.classList.remove('scale-100', 'opacity-100');
+                passwordModalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    passwordModal.classList.add('hidden');
+                    passwordForm.reset();
+                }, 300);
+            }
+            
+            closePasswordModal.addEventListener('click', closePasswordModalFunc);
+            
+            passwordModal.addEventListener('click', function(e) {
+                if (e.target === passwordModal) {
+                    closePasswordModalFunc();
+                }
+            });
+            
+            // 切換密碼可見性
+            togglePassword.addEventListener('click', function() {
+                const type = userPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+                userPassword.setAttribute('type', type);
+                
+                // 切換圖標
+                if (type === 'password') {
+                    this.innerHTML = '<i class="fa fa-eye"></i>';
+                } else {
+                    this.innerHTML = '<i class="fa fa-eye-slash"></i>';
+                }
+            });
+            
+            // 密碼驗證表單提交
+            passwordForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const userId = document.getElementById('target-user-id').value;
+                const password = userPassword.value;
+                
+                // 驗證密碼
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const user = users.find(u => u.id === userId && u.password === password);
+                
+                if (user) {
+                    // 登入成功
+                    currentUser = user;
+                    saveCurrentUser(currentUser);
+                    updateUIForLoggedInUser();
+                    loadMessages();
+                    closePasswordModalFunc();
+                    showNotification('登入成功', `歡迎回來，${currentUser.name}`, 'success');
+                    
+                    // 自動滾動到留言區
+                    setTimeout(() => {
+                        document.getElementById('messages').scrollIntoView({ behavior: 'smooth' });
+                    }, 500);
+                } else {
+                    // 密碼錯誤，添加抖動效果
+                    userPassword.classList.add('border-red-500');
+                    userPassword.classList.add('animate-shake');
+                    setTimeout(() => {
+                        userPassword.classList.remove('animate-shake');
+                    }, 500);
+                    showNotification('驗證失敗', '密碼不正確，請重新輸入', 'error');
+                }
+            });
+            
+            // 登出功能
+            const logoutBtn = document.getElementById('logout-btn');
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('currentUser');
+                currentUser = null;
+                updateUIForLoggedOutUser();
+                showNotification('已登出', '您已成功退出登入', 'info');
+            });
+            
+            // 前往留言區按鈕
+            const goToMessagesBtn = document.getElementById('go-to-messages');
+            goToMessagesBtn.addEventListener('click', function() {
+                document.getElementById('messages').scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // 發送新留言
+            const sendMessageBtn = document.getElementById('send-message-btn');
+            const newMessageContent = document.getElementById('new-message-content');
+            
+            sendMessageBtn.addEventListener('click', function() {
+                sendNewMessage();
+            });
+            
+            newMessageContent.addEventListener('keydown', function(e) {
+                // 按Ctrl+Enter發送消息
+                if (e.ctrlKey && e.key === 'Enter') {
+                    sendNewMessage();
+                }
+            });
+            
+            // 載入更多留言
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            loadMoreBtn.addEventListener('click', function() {
+                displayedMessages += 10;
+                renderMessages();
+                
+                // 如果已經顯示了所有留言，隱藏載入更多按鈕
+                if (displayedMessages >= messages.length) {
+                    loadMoreBtn.disabled = true;
+                }
+            });
+            
+            // 通知關閉按鈕
+            const closeNotification = document.getElementById('close-notification');
+            closeNotification.addEventListener('click', hideNotification);
+        });
+        
+        // 控制台修改用戶名的函數
+        window.changeUsername = function(userId, newName) {
+            // 驗證輸入
+            if (!userId || !newName) {
+                console.error('請提供用戶ID和新用戶名');
+                return false;
+            }
+            
+            if (newName.length < 2 || newName.length > 10) {
+                console.error('用戶名長度必須為2-10個字符');
+                return false;
+            }
+            
+            // 更新用戶數據
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.id === userId);
+            
+            if (userIndex === -1) {
+                console.error('未找到ID為"' + userId + '"的用戶');
+                return false;
+            }
+            
+            // 保存舊用戶名用於提示
+            const oldName = users[userIndex].name;
+            
+            // 更新用戶名
+            users[userIndex].name = newName;
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // 如果是當前登入用戶，更新當前用戶信息
+            if (currentUser && currentUser.id === userId) {
+                currentUser.name = newName;
+                saveCurrentUser(currentUser);
+                updateUIForLoggedInUser();
+            }
+            
+            // 更新消息中的用戶名
+            updateUserNameInMessages(userId, newName);
+            
+            // 重新生成用戶列表和消息
+            generateUserList();
+            renderMessages();
+            
+            console.log(`成功將用戶"${userId}"的名稱從"${oldName}"修改為"${newName}"`);
+            return true;
+        }
+        
+        // 獲取所有用戶ID和名稱的函數（輔助控制台操作）
+        window.listAllUsers = function() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            console.log('所有用戶列表：');
+            users.forEach(user => {
+                console.log(`ID: ${user.id}, 名稱: ${user.name}, 角色: ${user.role === 'teacher' ? '教師' : '學生'}`);
+            });
+            return users;
+        }
+        
+        // 更新消息中的用戶名
+        function updateUserNameInMessages(userId, newName) {
+            // 更新消息中的作者名稱
+            messages.forEach(message => {
+                if (message.author.id === userId) {
+                    message.author.name = newName;
+                }
+                
+                // 更新回覆中的作者名稱
+                message.replies.forEach(reply => {
+                    if (reply.author.id === userId) {
+                        reply.author.name = newName;
+                    }
+                    
+                    // 更新引用消息中的作者名稱
+                    if (reply.quotedMessage && reply.quotedMessage.author && 
+                        reply.quotedMessage.author.id === userId) {
+                        reply.quotedMessage.author.name = newName;
+                    }
+                });
+            });
+            
+            // 保存更新後的消息
+            saveMessagesToLocalStorage();
+        }
+        
+        // 初始化本地存儲 - 使用固定的帳戶名稱和密碼
+        function initLocalStorage() {
+            // 臨時清除舊數據（首次運行後可保留或刪除，避免舊緩存干擾）
+            localStorage.removeItem('users');
+            localStorage.removeItem('messages');
+            localStorage.removeItem('currentUser');
+            
+            // 檢查是否有用戶數據，如果沒有則初始化
+            if (!localStorage.getItem('users')) {
+                const users = [];
+
+                // 老師帳號 (使用固定密碼)
+                users.push({
+                    id: 'teacher',
+                    password: "ciYhnt", // 固定的老師密碼
+                    name: '班主任',
+                    role: 'teacher',
+                    avatar: 'https://picsum.photos/id/1005/100/100'
+                });
+
+                // 學生帳號列表（使用固定的學號、名稱和密碼）
+                const studentData = [
+                    { id: "student1", name: "S23044", password: "UU6g6B" },
+                    { id: "student2", name: "S23047", password: "paQs14" },
+                    { id: "student3", name: "S23049", password: "bKSZ4M" },
+                    { id: "student4", name: "S23050", password: "jxueIJ" },
+                    { id: "student5", name: "S23051", password: "2w29uA" },
+                    { id: "student6", name: "S23054", password: "G3yE9c" },
+                    { id: "student7", name: "S22051", password: "TcX8ZM" },
+                    { id: "student8", name: "S23004", password: "BzshzF" },
+                    { id: "student9", name: "S23057", password: "SspHPp" },
+                    { id: "student10", name: "S23058", password: "kGgbyj" },
+                    { id: "student11", name: "S23061", password: "q7W1um" },
+                    { id: "student12", name: "S23062", password: "u8TlUq" },
+                    { id: "student13", name: "S23010", password: "BuF9uV" },
+                    { id: "student14", name: "S23011", password: "P0S0Ty" },
+                    { id: "student15", name: "S23066", password: "Xdu0T9" },
+                    { id: "student16", name: "S23068", password: "x1pXOC" },
+                    { id: "student17", name: "S23018", password: "woxyrT" },
+                    { id: "student18", name: "S23078", password: "pnbXdB" },
+                    { id: "student19", name: "S23079", password: "ghFsM6" },
+                    { id: "student20", name: "S23023", password: "SPFEpV" },
+                    { id: "student21", name: "S23086", password: "mv1ddg" },
+                    { id: "student22", name: "S23091", password: "axMUiz" },
+                    { id: "student23", name: "S23092", password: "fRHLA6" },
+                    { id: "student24", name: "S23099", password: "Y1YEUX" },
+                    { id: "student25", name: "S23029", password: "tsRVkn" },
+                    { id: "student26", name: "S23100", password: "0U4Xek" },
+                    { id: "student27", name: "S23030", password: "qtRpdH" },
+                    { id: "student28", name: "S23106", password: "z8KKHH" },
+                    { id: "student29", name: "S23115", password: "L32dMz" },
+                    { id: "student30", name: "S23117", password: "YJ9vXg" },
+                    { id: "student31", name: "S23119", password: "bO58pR" },
+                    { id: "student32", name: "S23121", password: "cJfJmr" },
+                    { id: "student33", name: "S23121", password: "foCSma" }
+                ];
+
+                // 添加學生帳號到用戶數組
+                studentData.forEach((student, index) => {
+                    users.push({
+                        id: student.id,
+                        password: student.password,
+                        name: student.name,
+                        role: 'student',
+                        avatar: `https://picsum.photos/id/${1010 + index}/100/100`
+                    });
+                });
+
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+
+            // 初始化留言數據（如果不存在）
+            if (!localStorage.getItem('messages')) {
+                const initialMessages = [
+                    {
+                        id: '1',
+                        content: '歡迎大家使用這個互動平台！有任何學習問題都可以在這裡提問。',
+                        author: {
+                            id: 'teacher',
+                            name: '班主任',
+                            role: 'teacher',
+                            avatar: 'https://picsum.photos/id/1005/100/100'
+                        },
+                        timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                        replies: [
+                            {
+                                id: '1-1',
+                                content: '老師，請問下週的作業是什麼？',
+                                author: {
+                                    id: 'student1',
+                                    name: 'S23044',
+                                    role: 'student',
+                                    avatar: 'https://picsum.photos/id/1011/100/100'
+                                },
+                                timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString(),
+                                quotedMessage: null
+                            },
+                            {
+                                id: '1-2',
+                                content: '下週的作業是完成教材第5章的練習題。',
+                                author: {
+                                    id: 'teacher',
+                                    name: '班主任',
+                                    role: 'teacher',
+                                    avatar: 'https://picsum.photos/id/1005/100/100'
+                                },
+                                timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(),
+                                quotedMessage: {
+                                    id: '1-1',
+                                    content: '老師，請問下週的作業是什麼？',
+                                    author: {
+                                        name: 'S23044'
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: '2',
+                        content: '大家好，我在學習過程中遇到了一些困難，有人能幫忙解答嗎？',
+                        author: {
+                            id: 'student5',
+                            name: 'S23051',
+                            role: 'student',
+                            avatar: 'https://picsum.photos/id/1015/100/100'
+                        },
+                        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                        replies: []
+                    }
+                ];
+                
+                localStorage.setItem('messages', JSON.stringify(initialMessages));
+            }
+        }
+        
+        // 生成用戶列表
+        function generateUserList() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userListContainer = document.querySelector('#users .grid');
+            userListContainer.innerHTML = ''; // 清空現有列表
+            
+            // 按角色排序，老師在前，學生在後
+            users.sort((a, b) => {
+                if (a.role === 'teacher' && b.role !== 'teacher') return -1;
+                if (a.role !== 'teacher' && b.role === 'teacher') return 1;
+                return a.id.localeCompare(b.id);
+            });
+            
+            users.forEach(user => {
+                const userCard = document.createElement('div');
+                const roleClass = user.role === 'teacher' ? 'bg-teacher/10 border-teacher/20' : 'bg-student/10 border-student/20';
+                const roleTextClass = user.role === 'teacher' ? 'bg-teacher/10 text-teacher' : 'bg-student/10 text-student';
+                const roleText = user.role === 'teacher' ? '教師' : '學生';
+                
+                userCard.className = `user-card card-hover ${roleClass} rounded-xl p-4 flex flex-col items-center text-center cursor-pointer border`;
+                userCard.innerHTML = `
+                    <img src="${user.avatar}" alt="${user.name}的頭像" class="w-16 h-16 rounded-full object-cover mb-3 border-2 ${user.role === 'teacher' ? 'border-teacher' : 'border-student'}">
+                    <h3 class="font-bold text-gray-800">${user.name}</h3>
+                    <p class="text-xs ${roleTextClass} px-2 py-1 rounded-full mt-1">${roleText}</p>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded mt-2">需要密碼登入</span>
+                `;
+                
+                // 添加點擊事件 - 打開密碼輸入框
+                userCard.addEventListener('click', function() {
+                    document.getElementById('target-user-id').value = user.id;
+                    document.getElementById('password-user-avatar').src = user.avatar;
+                    document.getElementById('password-user-name').textContent = user.name;
+                    
+                    const roleElement = document.getElementById('password-user-role');
+                    roleElement.textContent = roleText;
+                    roleElement.className = `text-xs ${roleTextClass} px-2 py-1 rounded-full inline-block mt-1`;
+                    
+                    openPasswordModal();
+                });
+                
+                userListContainer.appendChild(userCard);
+            });
+        }
+        
+        // 查看用戶密碼的輔助函數（僅用於開發和測試）
+        function showAllUserPasswords() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            console.log("所有用戶及其密碼：");
+            users.forEach(user => {
+                console.log(`${user.name} (${user.id}): ${user.password}`);
+            });
+        }
+        
+        // 檢查已登入用戶
+        function checkLoggedInUser() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUIForLoggedInUser();
+            } else {
+                updateUIForLoggedOutUser();
+            }
+        }
+        
+        // 保存當前用戶
+        function saveCurrentUser(user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+        }
+        
+        // 更新登入狀態的UI
+        function updateUIForLoggedInUser() {
+            // 顯示用戶狀態
+            document.getElementById('user-status').classList.remove('hidden');
+            document.getElementById('user-status').classList.add('flex');
+            
+            // 更新用戶信息
+            document.getElementById('nav-avatar').src = currentUser.avatar;
+            document.getElementById('nav-avatar').className = `w-8 h-8 rounded-full object-cover border-2 ${currentUser.role === 'teacher' ? 'border-teacher' : 'border-student'}`;
+            document.getElementById('nav-username').textContent = currentUser.name;
+            
+            const roleElement = document.getElementById('nav-role');
+            if (currentUser.role === 'teacher') {
+                roleElement.textContent = '教師';
+                roleElement.className = 'text-xs bg-teacher/10 text-teacher px-2 py-1 rounded-full';
+            } else {
+                roleElement.textContent = '學生';
+                roleElement.className = 'text-xs bg-student/10 text-student px-2 py-1 rounded-full';
+            }
+            
+            // 更新歡迎信息
+            document.getElementById('welcome-message').classList.add('hidden');
+            document.getElementById('login-prompt').classList.remove('hidden');
+            document.getElementById('logged-in-as').textContent = `${currentUser.name} (${currentUser.role === 'teacher' ? '教師' : '學生'})`;
+            
+            // 更新新留言區域的頭像
+            document.getElementById('new-message-avatar').src = currentUser.avatar;
+            
+            // 顯示留言區
+            document.getElementById('messages').classList.remove('hidden');
+        }
+        
+        // 更新未登入狀態的UI
+        function updateUIForLoggedOutUser() {
+            // 隱藏用戶狀態
+            document.getElementById('user-status').classList.add('hidden');
+            document.getElementById('user-status').classList.remove('flex');
+            
+            // 恢復歡迎信息
+            document.getElementById('welcome-message').classList.remove('hidden');
+            document.getElementById('login-prompt').classList.add('hidden');
+            
+            // 隱藏留言區
+            document.getElementById('messages').classList.add('hidden');
+        }
+        
+        // 載入留言
+        function loadMessages() {
+            const savedMessages = localStorage.getItem('messages');
+            if (savedMessages) {
+                messages = JSON.parse(savedMessages);
+                // 按時間排序，最新的在後面
+                messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                renderMessages();
+            }
+        }
+        
+        // 保存留言到本地存儲
+        function saveMessagesToLocalStorage() {
+            localStorage.setItem('messages', JSON.stringify(messages));
+        }
+        
+        // 渲染留言列表
+        function renderMessages() {
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = '';
+            
+            // 只顯示指定數量的留言
+            const messagesToShow = messages.slice(-displayedMessages);
+            
+            if (messagesToShow.length === 0) {
+                messagesContainer.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                        <i class="fa fa-comment-o text-gray-300 text-5xl mb-4"></i>
+                        <p class="text-gray-500">還沒有留言，快來發表第一條留言吧！</p>
+                    </div>
+                `;
+                document.getElementById('load-more-btn').disabled = true;
+                return;
+            }
+            
+            // 生成留言HTML
+            messagesToShow.forEach(message => {
+                const messageElement = createMessageElement(message);
+                messagesContainer.appendChild(messageElement);
+            });
+            
+            // 控制載入更多按鈕狀態
+            document.getElementById('load-more-btn').disabled = displayedMessages >= messages.length;
+        }
+        
+        // 創建留言元素
+        function createMessageElement(message) {
+            const roleClass = message.author.role === 'teacher' ? 'border-teacher bg-teacher/5' : 'border-student bg-student/5';
+            const roleBadgeClass = message.author.role === 'teacher' ? 'bg-teacher text-white' : 'bg-student text-white';
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `bg-white rounded-lg shadow-md overflow-hidden message-appear`;
+            messageElement.setAttribute('data-message-id', message.id);
+            
+            // 構建留言HTML
+            let messageHTML = `
+                <div class="p-4 ${roleClass} border-l-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center">
+                            <img src="${message.author.avatar}" alt="${message.author.name}的頭像" class="w-10 h-10 rounded-full mr-3">
+                            <div>
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">${message.author.name}</h3>
+                                    <span class="ml-2 text-xs ${roleBadgeClass} px-2 py-0.5 rounded-full">${message.author.role === 'teacher' ? '教師' : '學生'}</span>
+                                </div>
+                                <p class="text-xs text-gray-500">${formatDate(message.timestamp)}</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="reply-btn text-gray-500 hover:text-teacher transition-colors text-sm" data-message-id="${message.id}">
+                                <i class="fa fa-reply mr-1"></i> 回覆
+                            </button>
+                            <button class="quote-reply-btn text-gray-500 hover:text-teacher transition-colors text-sm" data-message-id="${message.id}">
+                                <i class="fa fa-quote-right mr-1"></i> 引用
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 pl-14">
+                        <p class="text-gray-700">${message.content}</p>
+                    </div>
+                </div>
+            `;
+            
+            // 添加回覆區域
+            messageHTML += `
+                <div class="p-4">
+                    <div class="replies-container space-y-4">
+                        ${message.replies.map(reply => createReplyHTML(reply)).join('')}
+                    </div>
+                </div>
+            `;
+            
+            messageElement.innerHTML = messageHTML;
+            
+            // 綁定回覆按鈕事件
+            messageElement.querySelector('.reply-btn').addEventListener('click', function() {
+                const messageId = this.getAttribute('data-message-id');
+                showReplyBox(messageId);
+            });
+            
+            // 綁定引用回覆按鈕事件
+            messageElement.querySelector('.quote-reply-btn').addEventListener('click', function() {
+                const messageId = this.getAttribute('data-message-id');
+                showQuoteReplyBox(messageId);
+            });
+            
+            return messageElement;
+        }
+        
+        // 創建回覆HTML
+        function createReplyHTML(reply) {
+            const roleClass = reply.author.role === 'teacher' ? 'border-teacher' : 'border-student';
+            
+            let replyHTML = '';
+            
+            // 如果有引用內容，添加引用塊
+            if (reply.quotedMessage) {
+                replyHTML += `
+                    <div class="bg-gray-50 p-2 rounded text-sm border-l-2 border-gray-200 mb-2 ml-10">
+                        <div class="text-gray-500 font-medium">引用 ${reply.quotedMessage.author.name}:</div>
+                        <div class="text-gray-600">${reply.quotedMessage.content}</div>
+                    </div>
+                `;
+            }
+            
+            // 回覆內容
+            replyHTML += `
+                <div class="flex space-x-3">
+                    <img src="${reply.author.avatar}" alt="${reply.author.name}的頭像" class="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-2">
+                    <div class="flex-grow">
+                        <div class="flex items-center mb-1">
+                            <h4 class="font-medium text-gray-800 text-sm">${reply.author.name}</h4>
+                            <span class="ml-2 text-xs ${reply.author.role === 'teacher' ? 'bg-teacher text-white' : 'bg-student text-white'} px-2 py-0.5 rounded-full">${reply.author.role === 'teacher' ? '教師' : '學生'}</span>
+                            <span class="ml-2 text-xs text-gray-500">${formatDate(reply.timestamp)}</span>
+                        </div>
+                        <p class="text-gray-700 text-sm">${reply.content}</p>
+                        <div class="mt-1 flex space-x-3">
+                            <button class="reply-to-reply-btn text-gray-500 hover:text-teacher transition-colors text-xs" data-message-id="${reply.messageId}" data-reply-id="${reply.id}">
+                                <i class="fa fa-reply mr-1"></i> 回覆
+                            </button>
+                            <button class="quote-reply-to-reply-btn text-gray-500 hover:text-teacher transition-colors text-xs" data-message-id="${reply.messageId}" data-reply-id="${reply.id}">
+                                <i class="fa fa-quote-right mr-1"></i> 引用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return replyHTML;
+        }
+        
+        // 顯示回覆框
+        function showReplyBox(messageId) {
+            // 先移除所有已存在的回覆框
+            removeAllReplyBoxes();
+            
+            const messageElement = document.querySelector(`.message-appear[data-message-id="${messageId}"]`);
+            const repliesContainer = messageElement.querySelector('.replies-container');
+            
+            // 克隆回覆模板
+            const replyTemplate = document.getElementById('reply-template');
+            const replyBox = replyTemplate.cloneNode(true);
+            replyBox.id = `reply-box-${messageId}`;
+            replyBox.classList.remove('hidden');
+            
+            // 設置當前用戶頭像
+            replyBox.querySelector('.reply-avatar').src = currentUser.avatar;
+            
+            // 添加到回覆容器
+            repliesContainer.appendChild(replyBox);
+            
+            // 自動聚焦
+            replyBox.querySelector('.reply-content').focus();
+            
+            // 綁定取消回覆事件
+            replyBox.querySelector('.cancel-reply').addEventListener('click', function() {
+                replyBox.remove();
+            });
+            
+            // 綁定發送回覆事件
+            replyBox.querySelector('.send-reply').addEventListener('click', function() {
+                const content = replyBox.querySelector('.reply-content').value.trim();
+                if (content) {
+                    sendReply(messageId, null, content);
+                    replyBox.remove();
+                }
+            });
+            
+            // 按Ctrl+Enter發送回覆
+            replyBox.querySelector('.reply-content').addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    const content = this.value.trim();
+                    if (content) {
+                        sendReply(messageId, null, content);
+                        replyBox.remove();
+                    }
+                }
+            });
+        }
+        
+        // 顯示引用回覆框
+        function showQuoteReplyBox(messageId, replyId = null) {
+            // 先移除所有已存在的回覆框
+            removeAllReplyBoxes();
+            
+            const messageElement = document.querySelector(`.message-appear[data-message-id="${messageId}"]`);
+            const repliesContainer = messageElement.querySelector('.replies-container');
+            
+            // 找到要引用的內容
+            let quotedContent, quotedAuthor;
+            
+            if (replyId) {
+                // 引用回覆
+                const messageIndex = messages.findIndex(m => m.id === messageId);
+                const replyIndex = messages[messageIndex].replies.findIndex(r => r.id === replyId);
+                const reply = messages[messageIndex].replies[replyIndex];
+                
+                quotedContent = reply.content;
+                quotedAuthor = reply.author.name;
+            } else {
+                // 引用主留言
+                const messageIndex = messages.findIndex(m => m.id === messageId);
+                const message = messages[messageIndex];
+                
+                quotedContent = message.content;
+                quotedAuthor = message.author.name;
+            }
+            
+            // 克隆引用回覆模板
+            const quoteReplyTemplate = document.getElementById('quote-reply-template');
+            const replyBox = quoteReplyTemplate.cloneNode(true);
+            replyBox.id = `quote-reply-box-${messageId}${replyId ? '-' + replyId : ''}`;
+            replyBox.classList.remove('hidden');
+            
+            // 設置當前用戶頭像
+            replyBox.querySelector('.quote-reply-avatar').src = currentUser.avatar;
+            
+            // 設置引用內容
+            replyBox.querySelector('.quote-author').textContent = quotedAuthor;
+            replyBox.querySelector('.quote-content').textContent = quotedContent;
+            
+            // 添加到回覆容器
+            repliesContainer.appendChild(replyBox);
+            
+            // 自動聚焦
+            replyBox.querySelector('.quote-reply-content').focus();
+            
+            // 綁定移除引用事件
+            replyBox.querySelector('.remove-quote').addEventListener('click', function() {
+                replyBox.querySelector('.bg-gray-50').remove();
+            });
+            
+            // 綁定取消回覆事件
+            replyBox.querySelector('.cancel-quote-reply').addEventListener('click', function() {
+                replyBox.remove();
+            });
+            
+            // 綁定發送回覆事件
+            replyBox.querySelector('.send-quote-reply').addEventListener('click', function() {
+                const content = replyBox.querySelector('.quote-reply-content').value.trim();
+                if (content) {
+                    const quotedMessage = {
+                        id: replyId || messageId,
+                        content: quotedContent,
+                        author: {
+                            name: quotedAuthor
+                        }
+                    };
+                    sendReply(messageId, quotedMessage, content);
+                    replyBox.remove();
+                }
+            });
+            
+            // 按Ctrl+Enter發送回覆
+            replyBox.querySelector('.quote-reply-content').addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    const content = this.value.trim();
+                    if (content) {
+                        const quotedMessage = {
+                            id: replyId || messageId,
+                            content: quotedContent,
+                            author: {
+                                name: quotedAuthor
+                            }
+                        };
+                        sendReply(messageId, quotedMessage, content);
+                        replyBox.remove();
+                    }
+                }
+            });
+        }
+        
+        // 移除所有回覆框
+        function removeAllReplyBoxes() {
+            document.querySelectorAll('#reply-template, #quote-reply-template').forEach(template => {
+                const clones = document.querySelectorAll(`[id^="${template.id.replace('template', 'box-')}"]`);
+                clones.forEach(clone => clone.remove());
+            });
+        }
+        
+        // 發送新留言
+        function sendNewMessage() {
+            const content = document.getElementById('new-message-content').value.trim();
+            
+            if (content && currentUser) {
+                const newMessage = {
+                    id: Date.now().toString(),
+                    content: content,
+                    author: {
+                        id: currentUser.id,
+                        name: currentUser.name,
+                        role: currentUser.role,
+                        avatar: currentUser.avatar
+                    },
+                    timestamp: new Date().toISOString(),
+                    replies: []
+                };
+                
+                messages.push(newMessage);
+                saveMessagesToLocalStorage();
+                
+                // 確保顯示最新的留言
+                if (displayedMessages < messages.length) {
+                    displayedMessages = messages.length;
+                }
+                
+                renderMessages();
+                
+                // 清空輸入框
+                document.getElementById('new-message-content').value = '';
+                
+                // 滾動到底部
+                document.getElementById('messages-container').scrollIntoView({ behavior: 'smooth', block: 'end' });
+                
+                showNotification('發送成功', '您的留言已發布', 'success');
+            }
+        }
+        
+        // 發送回覆
+        function sendReply(messageId, quotedMessage, content) {
+            if (!content || !currentUser) return;
+            
+            const messageIndex = messages.findIndex(m => m.id === messageId);
+            if (messageIndex !== -1) {
+                const newReply = {
+                    id: `${messageId}-${Date.now()}`,
+                    messageId: messageId,
+                    content: content,
+                    author: {
+                        id: currentUser.id,
+                        name: currentUser.name,
+                        role: currentUser.role,
+                        avatar: currentUser.avatar
+                    },
+                    timestamp: new Date().toISOString(),
+                    quotedMessage: quotedMessage
+                };
+                
+                messages[messageIndex].replies.push(newReply);
+                saveMessagesToLocalStorage();
+                renderMessages();
+                
+                showNotification('回覆成功', '您的回覆已發布', 'success');
+            }
+        }
+        
+        // 顯示通知
+        function showNotification(title, message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const notificationTitle = document.getElementById('notification-title');
+            const notificationMessage = document.getElementById('notification-message');
+            const notificationIcon = document.getElementById('notification-icon');
+            
+            // 設置通知類型樣式
+            notificationIcon.className = '';
+            if (type === 'success') {
+                notificationIcon.className = 'mr-3 text-green-500';
+                notificationIcon.innerHTML = '<i class="fa fa-check-circle text-xl"></i>';
+            } else if (type === 'error') {
+                notificationIcon.className = 'mr-3 text-red-500';
+                notificationIcon.innerHTML = '<i class="fa fa-exclamation-circle text-xl"></i>';
+            } else {
+                notificationIcon.className = 'mr-3 text-blue-500';
+                notificationIcon.innerHTML = '<i class="fa fa-info-circle text-xl"></i>';
+            }
+            
+            // 設置通知內容
+            notificationTitle.textContent = title;
+            notificationMessage.textContent = message;
+            
+            // 顯示通知
+            notification.classList.remove('translate-y-20', 'opacity-0');
+            notification.classList.add('translate-y-0', 'opacity-100');
+            
+            // 3秒後自動隱藏
+            setTimeout(hideNotification, 3000);
+        }
+        
+        // 隱藏通知
+        function hideNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('translate-y-0', 'opacity-100');
+            notification.classList.add('translate-y-20', 'opacity-0');
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) {
+                return `${diffInSeconds}秒前`;
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes}分鐘前`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours}小時前`;
+            } else if (diffInSeconds < 604800) {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days}天前`;
+            } else {
+                return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            }
+        }
+    </script>
+</body>
+</html>
