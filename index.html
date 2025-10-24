@@ -32,6 +32,30 @@
             line-height: 1.6;
             font-size: 16px;
             overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* 水印样式 */
+        .watermark {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none; /* 让水印不影响页面交互 */
+            opacity: 0.05; /* 水印透明度 */
+            background-image: url('https://twghkywc.edu.hk/sites/all/themes/ntemplate/images/web/sch_logo.png');
+            background-repeat: repeat;
+            background-size: 200px 200px; /* 水印大小 */
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        /* 内容容器 - 确保内容在水印上方 */
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
         }
         
         .container {
@@ -569,78 +593,82 @@
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <header>
-        <div class="container header-content">
-            <div class="logo">
-                <img src="https://twghkywc.edu.hk/sites/all/themes/ntemplate/images/web/sch_logo.png" alt="KYWC學校標誌" aria-hidden="false">
-                <h1>KYWC_3D班網</h1>
-            </div>
-            <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="打開導航菜單">
-                <i class="fas fa-bars"></i>
-            </button>
-            <nav>
-                <ul id="main-nav">
-                    <li><a href="#" class="active"><i class="fas fa-home" aria-hidden="true"></i> 首頁</a></li>
-                    <li><a href="#"><i class="fas fa-bullhorn" aria-hidden="true"></i> 班級公告</a></li>
-                    <li><a href="resources.html"><i class="fas fa-book" aria-hidden="true"></i> 學習資源</a></li>
-                    <li><a href="gallery.html"><i class="fas fa-camera" aria-hidden="true"></i> 班級風采</a></li>
-                    <li><a href="about.html"><i class="fas fa-users" aria-hidden="true"></i> 關於我們</a></li>
-                    <li><a href="calendar.html"><i class="fas fa-calendar" aria-hidden="true"></i> 班級日曆</a></li>
-                    <li><a href="info.html"><i class="fas fa-info-circle" aria-hidden="true"></i> 學校資訊</a></li>
-                    <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> 登出</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <!-- 横幅 -->
-    <section class="banner" aria-labelledby="banner-heading">
-        <div class="banner-content">
-            <h2 id="banner-heading">歡迎來到KYWC_3D大家庭</h2>
-        </div>
-    </section>
-
-    <main class="container">
-        <!-- 最新公告 -->
-        <h2 class="section-title" id="announcements-heading">最新公告</h2>
-        <div class="announcements" aria-labelledby="announcements-heading">
-            <div class="announcement-item" tabindex="0">
-                <h3>關於9月1日開學安排的通知</h3>
-                <div class="announcement-meta">
-                    <i class="far fa-calendar-alt" aria-hidden="true"></i> 發布時間: 2025年08月31日 | 
-                    <i class="fas fa-user" aria-hidden="true"></i> 發布人: NG老師
+    <!-- 水印图层 -->
+    <div class="watermark" aria-hidden="true"></div>
+    
+    <!-- 内容容器 -->
+    <div class="content-wrapper">
+        <!-- 导航栏 -->
+        <header>
+            <div class="container header-content">
+                <div class="logo">
+                    <img src="https://twghkywc.edu.hk/sites/all/themes/ntemplate/images/web/sch_logo.png" alt="KYWC學校標誌" aria-hidden="false">
+                    <h1>KYWC_3D班網</h1>
                 </div>
-                <p>有關 2025 年 9 月 1 日(星期一)，開學日事項提點 :
-                1. 請所有同學於早上八點前回到學校，並直接回到所屬班別課室。
-                2. 請穿著整齊夏季校服，留意儀容要求。
-                3. 請帶備書包及文具，明天班主任時段會處理開學班務及資訊。
-                4. 請留意開學日交通情況，預早出門。</p>
+                <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="打開導航菜單">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav>
+                    <ul id="main-nav">
+                        <li><a href="#" class="active"><i class="fas fa-home" aria-hidden="true"></i> 首頁</a></li>
+                        <li><a href="#"><i class="fas fa-bullhorn" aria-hidden="true"></i> 班級公告</a></li>
+                        <li><a href="resources.html"><i class="fas fa-book" aria-hidden="true"></i> 學習資源</a></li>
+                        <li><a href="gallery.html"><i class="fas fa-camera" aria-hidden="true"></i> 班級風采</a></li>
+                        <li><a href="about.html"><i class="fas fa-users" aria-hidden="true"></i> 關於我們</a></li>
+                        <li><a href="calendar.html"><i class="fas fa-calendar" aria-hidden="true"></i> 班級日曆</a></li>
+                        <li><a href="info.html"><i class="fas fa-info-circle" aria-hidden="true"></i> 學校資訊</a></li>
+                        <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> 登出</a></li>
+                    </ul>
+                </nav>
             </div>
-            <div class="announcement-item" tabindex="0">
-                <h3>4R 新學年</h3>
-                <div class="announcement-meta">
-                    <i class="far fa-calendar-alt" aria-hidden="true"></i> 發布時間: 2025年08月31日 | 
-                    <i class="fas fa-user" aria-hidden="true"></i> 發布人: NG老師
-                </div>
-                <p>4R 新學年，好精神，關注學生精神健康開學「適應周」活動。</p>
-            </div>
-            <div class="announcement-item" tabindex="0">
-                <h3>8 月 25 日領取網上訂購教科書提醒</h3>
-                <div class="announcement-meta">
-                    <i class="far fa-calendar-alt" aria-hidden="true"></i> 發布時間: 2023年10月5日 | 
-                    <i class="fas fa-user" aria-hidden="true"></i> 發布人: NG老師
-                </div>
-                <p>領取網上訂購教科書日期：2025年8月25日
-                地點：學校有蓋操場
-                為方便控制人流，各級建議回校領取教科書時間如下：
-                10:00-12:00: 中三及中四級
-                12:00-14:00 中一及中二級
-                14:00-16:00 中五及中六級。</p>
-            </div>
-        </div>
+        </header>
 
-        <!-- 快速链接 -->
+        <!-- 横幅 -->
+        <section class="banner" aria-labelledby="banner-heading">
+            <div class="banner-content">
+                <h2 id="banner-heading">歡迎來到KYWC_3D大家庭</h2>
+            </div>
+        </section>
+
+        <main class="container">
+            <!-- 最新公告 -->
+            <h2 class="section-title" id="announcements-heading">最新公告</h2>
+            <div class="announcements" aria-labelledby="announcements-heading">
+                <div class="announcement-item" tabindex="0">
+                    <h3>關於9月1日開學安排的通知</h3>
+                    <div class="announcement-meta">
+                        <i class="far fa-calendar-alt" aria-hidden="true"></i> 發布時間: 2025年08月31日 | 
+                        <i class="fas fa-user" aria-hidden="true"></i> 發布人: NG老師
+                    </div>
+                    <p>有關 2025 年 9 月 1 日(星期一)，開學日事項提點 :
+                    1. 請所有同學於早上八點前回到學校，並直接回到所屬班別課室。
+                    2. 請穿著整齊夏季校服，留意儀容要求。
+                    3. 請帶備書包及文具，明天班主任時段會處理開學班務及資訊。
+                    4. 請留意開學日交通情況，預早出門。</p>
+                </div>
+                <div class="announcement-item" tabindex="0">
+                    <h3>4R 新學年</h3>
+                    <div class="announcement-meta">
+                        <i class="far fa-calendar-alt" aria-hidden="true"></i> 發布時間: 2025年08月31日 | 
+                        <i class="fas fa-user" aria-hidden="true"></i> 發布人: NG老師
+                    </div>
+                    <p>4R 新學年，好精神，關注學生精神健康開學「適應周」活動。</p>
+                </div>
+                <div class="announcement-item" tabindex="0">
+                    <h3>8 月 25 日領取網上訂購教科書提醒</h3>
+                    <div class="announcement-meta">
+                        <i class="far fa-calendar-alt" aria-hidden="true"></i> 發布時間: 2023年10月5日 | 
+                        <i class="fas fa-user" aria-hidden="true"></i> 發布人: NG老師
+                    </div>
+                    <p>領取網上訂購教科書日期：2025年8月25日
+                    地點：學校有蓋操場
+                    為方便控制人流，各級建議回校領取教科書時間如下：
+                    10:00-12:00: 中三及中四級
+                    12:00-14:00 中一及中二級
+                    14:00-16:00 中五及中六級。</p>
+                </div>
+            </div>
+              <!-- 快速链接 -->
         <h2 class="section-title" id="quick-links-heading">快速連結</h2>
         <div class="quick-links" aria-labelledby="quick-links-heading">
             <div class="quick-link-card">
@@ -811,7 +839,3 @@
 </body>
 
 </html>
-
-
-
-
