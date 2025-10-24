@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="images/icons/icon.png" sizes="16x16" type="image/png">
     <title>關於我們 KYWC_3D</title>
-    <!-- 引入Font Awesome图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* 共用樣式 */
         * {
             margin: 0;
             padding: 0;
@@ -28,7 +26,7 @@
             padding: 0 20px;
         }
         
-        /* 導航欄樣式 */
+
         nav {
             background: #35424a;
             color: white;
@@ -59,22 +57,22 @@
             color: white;
             text-decoration: none;
             transition: color 0.3s;
-            padding: 8px; /* 增加點擊區域 */
-            display: inline-block; /* 確保點擊區域完整 */
+            padding: 8px; 
+            display: inline-block; 
         }
         
         .nav-links a:hover,
-        .nav-links a:focus { /* 焦點狀態可見 */
+        .nav-links a:focus { 
             color: #e8491d;
             outline: 2px solid #e8491d;
             outline-offset: 2px;
         }
         
-        /* 頁面標頭 */
+        
         .page-header {
             text-align: center;
             padding: 4rem 0;
-            background: linear-gradient(135deg, #4a5faa 0%, #603b8a 100%); /* 加深顏色提高對比度 */
+            background: linear-gradient(135deg, #4a5faa 0%, #603b8a 100%); 
             color: white;
             position: relative;
             overflow: hidden;
@@ -93,7 +91,7 @@
             animation: fadeInUp 1s ease 0.2s both;
         }
         
-        /* 班級介紹 */
+       
         .class-intro {
             padding: 4rem 0;
             background: white;
@@ -114,7 +112,7 @@
         
         .intro-text p {
             font-size: 1.1rem;
-            color: #333; /* 加深文本顏色提高對比度 */
+            color: #333; 
             margin-bottom: 1.5rem;
             line-height: 1.8;
         }
@@ -141,16 +139,16 @@
         .stat-number {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #4a5faa; /* 調整顏色提高對比度 */
+            color: #4a5faa; 
             margin-bottom: 0.5rem;
         }
         
         .stat-label {
-            color: #333; /* 加深文本顏色 */
+            color: #333; 
             font-weight: 500;
         }
         
-        /* 老師介紹 */
+
         .teachers-section {
             padding: 4rem 0;
             background: #f8f9fa;
@@ -187,7 +185,7 @@
             height: 120px;
             border-radius: 50%;
             margin: 0 auto 1.5rem;
-            background: linear-gradient(135deg, #4a5faa 0%, #603b8a 100%); /* 加深顏色 */
+            background: linear-gradient(135deg, #4a5faa 0%, #603b8a 100%); 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -203,13 +201,13 @@
         }
         
         .teacher-subject {
-            color: #4a5faa; /* 調整顏色提高對比度 */
+            color: #4a5faa; 
             font-weight: 500;
             margin-bottom: 1rem;
         }
         
         .teacher-bio {
-            color: #333; /* 加深文本顏色 */
+            color: #333; 
             line-height: 1.6;
         }
         
@@ -247,7 +245,7 @@
         .feature-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
-            color: #4a5faa; /* 調整顏色提高對比度 */
+            color: #4a5faa; 
         }
         
         .feature-title {
@@ -258,7 +256,7 @@
         }
         
         .feature-desc {
-            color: #333; /* 加深文本顏色 */
+            color: #333; 
             line-height: 1.6;
         }
         
@@ -319,7 +317,7 @@
         
         .contact-icon {
             font-size: 2.5rem;
-            color: #4a5faa; /* 調整顏色提高對比度 */
+            color: #4a5faa; 
             margin-bottom: 1rem;
         }
         
@@ -331,16 +329,16 @@
         }
         
         .contact-detail {
-            color: #333; /* 加深文本顏色 */
+            color: #333; 
         }
         
-        /* 地圖區域 */
+       
         .map-section {
             padding: 4rem 0;
             background: #f8f9fa;
         }
         
-        /* 動畫效果 */
+    
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -363,7 +361,6 @@
             transform: translateY(0);
         }
         
-        /* 支持減少動畫偏好 */
         @media (prefers-reduced-motion: reduce) {
             * {
                 animation: none !important;
@@ -376,7 +373,7 @@
             }
         }
         
-        /* 響應式設計 */
+    
         @media (max-width: 768px) {
             .intro-content {
                 grid-template-columns: 1fr;
@@ -408,7 +405,6 @@
             }
         }
         
-        /* 頁尾樣式 */
         footer {
             background: #35424a;
             color: white;
@@ -444,7 +440,7 @@
         }
         
         .footer-links a {
-            color: #e0e0e0; /* 提高文本亮度增強對比 */
+            color: #e0e0e0; 
             text-decoration: none;
             transition: color 0.3s;
             display: inline-block;
@@ -452,7 +448,7 @@
         }
         
         .footer-links a:hover,
-        .footer-links a:focus { /* 焦點狀態可見 */
+        .footer-links a:focus {
             color: #e8491d;
             outline: 2px solid #e8491d;
             outline-offset: 2px;
@@ -462,7 +458,7 @@
             margin-top: 2rem;
             padding-top: 2rem;
             border-top: 1px solid #555;
-            color: #e0e0e0; /* 提高文本亮度 */
+            color: #e0e0e0;
         }
         
         /* 回到頂部按鈕 */
@@ -497,7 +493,6 @@
     </style>
 </head>
 <body>
-    <!-- 導航欄 -->
     <nav aria-label="主要導航">
         <div class="container">
             <div class="logo">關於班級</div>
@@ -510,7 +505,6 @@
     </nav>
 
 
-    <!-- 頁面標頭 -->
     <header class="page-header">
         <div class="container">
             <h1>關於KYWC_3D</h1>
@@ -518,9 +512,7 @@
         </div>
     </header>
 
-    <!-- 主要內容 -->
     <main>
-        <!-- 班級介紹 -->
         <section class="class-intro">
             <div class="container">
                 <div class="intro-content">
@@ -552,7 +544,6 @@
             </div>
         </section>
 
-        <!-- 老師介紹 -->
         <section class="teachers-section">
             <div class="container">
                 <h2 class="section-title">我們的班主任</h2>
@@ -573,8 +564,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- 班級特色 -->
         <section class="features-section">
             <div class="container">
                 <h2 class="section-title">班級特色</h2>
@@ -599,8 +588,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- 班級相冊預覽 -->
         <section class="gallery-preview">
             <div class="container">
                 <h2 class="section-title">精彩瞬間</h2>
@@ -621,8 +608,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- 聯絡資訊 -->
         <section class="contact-section">
             <div class="container">
                 <h2 class="section-title">聯絡我們</h2>
@@ -654,7 +639,6 @@
             </div>
         </section>
         
-        <!-- 學校位置地圖 -->
         <section class="map-section">
             <div class="container">
                 <h2 class="section-title">學校位置</h2>
@@ -674,7 +658,6 @@
         </section>
     </main>
 
-    <!-- 回到頂部按鈕 -->
     <a href="#" class="back-to-top" aria-label="回到頁面頂部">
         <span aria-hidden="true">↑</span>
     </a>
@@ -714,7 +697,6 @@
     </footer>
 
     <script>
-        // 動畫可見性控制
         function checkVisibility() {
             const animateItems = document.querySelectorAll('.animate-item');
             
@@ -727,8 +709,7 @@
                 }
             });
         }
-        
-        // 回到頂部功能
+
         function initBackToTop() {
             const backToTopBtn = document.querySelector('.back-to-top');
             
@@ -749,12 +730,10 @@
             });
         }
         
-        // 檢查是否需要減少動畫
         function shouldReduceMotion() {
             return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         }
         
-        // 顯示用戶信息
         function displayUserInfo() {
             const userInfoElement = document.getElementById('user-info');
             const username = localStorage.getItem('username') || '用戶';
@@ -778,7 +757,6 @@
         }
         
 
-// 檢查登入狀態
 function checkAuth() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const authToken = localStorage.getItem('authToken');
@@ -789,7 +767,6 @@ function checkAuth() {
     }
     
     try {
-        // 驗證token是否有效
         const tokenData = JSON.parse(atob(authToken));
         const currentTime = Date.now();
         const tokenAge = currentTime - tokenData.timestamp;
@@ -813,24 +790,18 @@ function checkAuth() {
     }
 }
 
-// 頁面載入時檢查權限
 if (!checkAuth()) {
-    // 如果未登入，會自動跳轉到登入頁面
 }
 
 
-
-// 頁面載入時顯示用戶
 document.addEventListener('DOMContentLoaded', function() {
     displayCurrentUser();
     
-    // 定期檢查登入狀態（每5分鐘）
     setInterval(checkAuth, 5 * 60 * 1000);
 });
-        
-        // 初始化
+ 
         document.addEventListener('DOMContentLoaded', () => {
-            // 如果用戶偏好減少動畫，直接顯示所有元素
+            
             if (shouldReduceMotion()) {
                 document.querySelectorAll('.animate-item').forEach(item => {
                     item.classList.add('visible');
@@ -841,9 +812,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             initBackToTop();
-            // 調用登錄狀態檢查
             checkAuth();
         });
     </script>
 </body>
 </html>
+
