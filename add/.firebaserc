@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "kywc-3d-announcements",
+    "firebase deploy --only firestore:indexes": "kywc-3d-announcements"
+  },
+  "targets": {},
+  "etags": {}
+}

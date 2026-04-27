@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統診斷 - KYWC 3D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <main class="max-w-3xl mx-auto p-6 space-y-4">
+        <h1 class="text-2xl font-bold">KYWC 系統診斷</h1>
+        <p class="text-sm text-gray-600">用來快速檢查 Firebase 登入 / 管理員 UID，以及照片 API（iDrive E2）是否正常。</p>
+
+        <div class="bg-white rounded border p-4 space-y-2">
+            <div><span class="font-semibold">API Base：</span><span id="apiBase">檢查中...</span></div>
+            <div><span class="font-semibold">Photos API Base：</span><span id="photosApiBase">檢查中...</span></div>
+            <div><span class="font-semibold">Firebase UID：</span><span id="uid">檢查中...</span></div>
+            <div><span class="font-semibold">本地角色：</span><span id="role">檢查中...</span></div>
+            <div><span class="font-semibold">是否 admin UID：</span><span id="isAdmin">檢查中...</span></div>
+        </div>
+
+        <div class="bg-white rounded border p-4 space-y-2">
+            <div><span class="font-semibold">/api/admin/students：</span><span id="studentsApi">檢查中...</span></div>
+            <div><span class="font-semibold">/api/admin/photos：</span><span id="photosApi">檢查中...</span></div>
+        </div>
+
+        <div class="flex gap-3">
+            <a href="index.html" class="px-4 py-2 rounded bg-blue-700 text-white">回首頁</a>
+            <a href="admin.html" class="px-4 py-2 rounded bg-slate-700 text-white">去管理頁</a>
+        </div>
+    </main>
+
+    <script type="module">
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { auth, API_BASE, API_ENABLED, PHOTOS_API_BASE, PHOTOS_API_ENABLED, isAdminUser } from "./firebase-config.js";
+
+        const uidEl = document.getElementById("uid");
+        const apiBaseEl = document.getElementById("apiBase");
+        const photosApiBaseEl = document.getElementById("photosApiBase");
+        const roleEl = document.getElementById("role");
+        const isAdminEl = document.getElementById("isAdmin");
+        const studentsApiEl = document.getElementById("studentsApi");
+        const photosApiEl = document.getElementById("photosApi");
+        apiBaseEl.textContent = API_ENABLED ? API_BASE : "未啟用（純 Firebase 模式）";
+        photosApiBaseEl.textContent = PHOTOS_API_ENABLED ? PHOTOS_API_BASE : "未設定";
+
+        async function checkApi(path, el, withAuth = false) {
+            try {
+                const headers = {};
+                if (withAuth) {
+                    const user = auth.currentUser;
+                    if (!user) {
+                        el.textContent = "未登入，無法檢查管理接口";
+                        el.className = "text-red-600";
+                        return;
+                    }
+                    const token = await user.getIdToken();
+                    headers.Authorization = `Bearer ${token}`;
+                }
+
+                const res = await fetch(path, { headers });
+                if (!res.ok) {
+                    const text = (await res.text()) || res.statusText || "無回應內容";
+                    el.textContent = `失敗 (${res.status}) ${text}`;
+                    el.className = "text-red-600";
+                    return;
+                }
+                el.textContent = "正常";
+                el.className = "text-green-600";
+            } catch (err) {
+                el.textContent = `連線失敗：${err.message}`;
+                el.className = "text-red-600";
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                uidEl.textContent = "未登入";
+                roleEl.textContent = localStorage.getItem("userRole") || "未設定";
+                isAdminEl.textContent = "否";
+                isAdminEl.className = "text-red-600";
+                return;
+            }
+
+            const isAdmin = isAdminUser(user);
+            uidEl.textContent = user.uid;
+            roleEl.textContent = localStorage.getItem("userRole") || "未設定";
+            isAdminEl.textContent = isAdmin ? "是" : "否";
+            isAdminEl.className = isAdmin ? "text-green-600" : "text-red-600";
+
+            if (!API_ENABLED) {
+                studentsApiEl.textContent = "已略過（未啟用通用 API）";
+                studentsApiEl.className = "text-gray-500";
+            } else {
+                checkApi(`${API_BASE}/admin/students`, studentsApiEl, true);
+            }
+
+            if (!PHOTOS_API_ENABLED) {
+                photosApiEl.textContent = "已略過（未設定 Photos API）";
+                photosApiEl.className = "text-gray-500";
+            } else {
+                checkApi(`${PHOTOS_API_BASE}/admin/photos`, photosApiEl, true);
+            }
+        });
+    </script>
+</body>
+</html>

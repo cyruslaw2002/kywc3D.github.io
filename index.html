@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="shortcut icon" href="https://www.twghkywc.edu.hk/sites/default/files/sch_logo.png" type="image/png">
+    <title>KYWC-3D班網</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    // 優化：降低色彩飽和度，更符合香港網站低調沉穩的視覺風格
+                    colors: {
+                        primary: '#1A365D', // 深藍灰（替代原鮮藍，更港式）
+                        secondary: '#2C5282', // 淺深藍（低飽和度）
+                        accent: '#D73F09', // 港式紅（替代原亮紅，更沉穩）
+                        neutral: '#F8F9FA', // 淺灰背景（更柔和）
+                        dark: '#2D3748', // 深灰文字（替代原黑灰，更舒適）
+                        grayHK: '#E2E8F0', // 港式邊框灰
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 1px 2px rgba(0,0,0,0.08); /* 減弱文字陰影，更簡約 */
+            }
+            .text-shadow-lg {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.12); /* 減弱陰影，符合港式簡約 */
+            }
+            .scale-hover {
+                transition-property: transform; /* 簡化過渡，只保留縮放，減少過多動效 */
+                transition-duration: 200ms;
+            }
+            .scale-hover:hover {
+                transform: scale(1.01); /* 減弱縮放幅度，更低調 */
+            }
+            .card-shadow {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* 淺化陰影，港式網站少用重陰影 */
+            }
+            .touch-friendly {
+                min-height: 48px;
+                min-width: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .section-padding {
+                padding-top: 3rem; /* 減少上下內邊距，更緊湊實用 */
+                padding-bottom: 3rem;
+            }
+            @media (min-width: 768px) {
+                .section-padding {
+                    padding-top: 4rem;
+                    padding-bottom: 4rem;
+                }
+            }
+            .section-divider {
+                width: 4rem; /* 縮短分隔線，更精緻 */
+                height: 0.2rem;
+                margin-left: auto;
+                margin-right: auto;
+                margin-top: 1rem;
+                margin-bottom: 2rem;
+            }
+            .dropdown-shadow {
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06); /* 淺化下拉菜單陰影 */
+            }
+            .anchor-target {
+                scroll-margin-top: 100px;
+            }
+            /* 港式網站常見：hover效果低調，不誇張 */
+            .hk-hover {
+                transition: color 150ms ease-in-out, background-color 150ms ease-in-out;
+            }
+        }
+    </style>
+    <!-- 統一認證管理 -->
+    <script type="module" src="./auth.js"></script>
+</head>
+
+<body class="font-sans text-dark bg-white">
+    <div class="content-wrapper relative z-2">
+        <!-- 導航欄：簡化樣式，更符合香港校園網站的精簡導航 -->
+        <header class="bg-white border-b border-grayHK sticky top-0 z-40">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-3"> <!-- 減少上下內邊距 -->
+                    <!-- Logo -->
+                    <div class="logo">
+                        <a href="#home" class="flex items-center space-x-2" aria-label="返回首頁">
+                            <img src="https://www.twghkywc.edu.hk/sites/default/files/sch_logo.png" alt="KYWC學校標誌" class="w-7 h-7 sm:w-9 sm:h-9"> <!-- 略縮小Logo -->
+                            <span class="text-lg font-bold text-primary hidden sm:inline">KYWC 3D班網</span>
+                        </a>
+                    </div>
+                    
+                    <!-- 桌面端導航：簡化互動，低調hover -->
+                    <nav class="hidden md:flex items-center space-x-1">
+                        <!-- 首頁 -->
+                        <div class="relative group">
+                            <a href="#home" class="font-medium px-4 py-2 text-dark hk-hover hover:text-primary">首頁</a>
+                        </div>
+                        
+                        <!-- 最新公告（港式術語替換） -->
+                        <div class="relative group">
+                            <a href="#announcements" class="font-medium px-4 py-2 text-dark hk-hover hover:text-primary flex items-center cursor-pointer">
+                                最新公告
+                                <i class="fa fa-chevron-down ml-1 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                            </a>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg dropdown-shadow opacity-0 invisible group-hover:opacity-100 
+                                        group-hover:visible transition-all duration-200 transform origin-top scale-95 
+                                        group-hover:scale-100 z-50">
+                                <div class="py-2">
+                                    <a href="ad.html" class="block px-4 py-2 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">考試資訊</a>
+                                    <a href="announcements.html?category=activity" class="block px-4 py-2 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">活動通知</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 關於我們 -->
+                        <div class="relative group">
+                            <a href="#about" class="font-medium px-4 py-2 text-dark hk-hover hover:text-primary flex items-center cursor-pointer">
+                                關於我們
+                                <i class="fa fa-chevron-down ml-1 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                            </a>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg dropdown-shadow opacity-0 invisible group-hover:opacity-100 
+                                        group-hover:visible transition-all duration-200 transform origin-top scale-95 
+                                        group-hover:scale-100 z-50">
+                                <div class="py-2">
+                                    <a href="#about-teachers" class="block px-4 py-2 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班主任</a>
+                                    <a href="#about-committee" class="block px-4 py-2 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班會幹事</a>
+                                    <a href="#about-timetable" class="block px-4 py-2 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班級上課時間表</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 快速鏈接（港式術語：快速連結） -->
+                        <div class="relative group">
+                            <a href="#links" class="font-medium px-4 py-2 text-dark hk-hover hover:text-primary flex items-center cursor-pointer">
+                                快速連結
+                                <i class="fa fa-chevron-down ml-1 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                            </a>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg dropdown-shadow opacity-0 invisible group-hover:opacity-100 
+                                        group-hover:visible transition-all duration-200 transform origin-top scale-95 
+                                        group-hover:scale-100 z-50">
+                                <div class="py-2">
+                                    <a href="resources.html" class="block px-4 py-2 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">學習資源</a>
+                                    <a href="gallery.html" class="block px-4 py-2 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班級相冊</a>
+                                    <a href="committee.html" class="block px-4 py-2 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班會幹事</a>
+                                    <a href="info.html" class="block px-4 py-2 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">學校資訊</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 聯絡我們（港式術語） -->
+                        <div class="relative group">
+                            <a href="#contact" class="font-medium px-4 py-2 text-dark hk-hover hover:text-primary">聯絡我們</a>
+                        </div>
+
+                        <!-- 管理入口（僅管理員可見） -->
+                        <div class="relative group">
+                            <a href="admin.html" id="admin-entry" class="hidden font-medium px-4 py-2 text-dark hk-hover hover:text-primary">
+                                後台管理
+                            </a>
+                        </div>
+                        
+                        <!-- 登出（港式術語：登出/離開系統） -->
+                        <div class="relative group">
+                            <a href="#" id="logout-btn" class="font-medium px-4 py-2 text-dark hk-hover hover:text-primary flex items-center">
+                                <i class="fas fa-sign-out-alt mr-1" aria-hidden="true"></i> 登出
+                            </a>
+                        </div>
+                    </nav>
+                    
+                    <!-- 移動端菜單按鈕：簡化樣式 -->
+                    <button id="menu-toggle" class="md:hidden text-dark hk-hover hover:text-primary focus:outline-none p-2">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 移動端導航菜單：簡化背景與陰影 -->
+            <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-grayHK overflow-y-auto">
+                <div class="container mx-auto px-4 py-3 space-y-1">
+                    <!-- 首頁 -->
+                    <a href="#home" class="block py-3 px-4 font-medium text-dark hk-hover hover:bg-primary/5 hover:text-primary rounded-lg">首頁</a>
+                    
+                    <!-- 最新公告 -->
+                    <div class="mobile-dropdown">
+                        <button class="mobile-dropdown-toggle w-full flex justify-between items-center py-3 px-4 font-medium text-dark hk-hover hover:bg-primary/5 hover:text-primary rounded-lg text-left">
+                            最新公告
+                            <i class="fa fa-chevron-down text-xs transition-transform duration-200"></i>
+                        </button>
+                        <div class="mobile-dropdown-menu hidden pl-6 border-l-2 border-primary/20 mt-1 space-y-1">
+                            <a href="ad.html" class="block py-2 px-4 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">考試資訊</a>
+                            <a href="announcements.html?category=activity" class="block py-2 px-4 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">活動通知</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 關於我們 -->
+                    <div class="mobile-dropdown">
+                        <button class="mobile-dropdown-toggle w-full flex justify-between items-center py-3 px-4 font-medium text-dark hk-hover hover:bg-primary/5 hover:text-primary rounded-lg text-left">
+                            關於我們
+                            <i class="fa fa-chevron-down text-xs transition-transform duration-200"></i>
+                        </button>
+                        <div class="mobile-dropdown-menu hidden pl-6 border-l-2 border-primary/20 mt-1 space-y-1">
+                            <a href="#about-teachers" class="block py-2 px-4 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班主任</a>
+                            <a href="#about-committee" class="block py-2 px-4 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班會幹事</a>
+                            <a href="#about-timetable" class="block py-2 px-4 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班級上課時間表</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 快速連結 -->
+                    <div class="mobile-dropdown">
+                        <button class="mobile-dropdown-toggle w-full flex justify-between items-center py-3 px-4 font-medium text-dark hk-hover hover:bg-primary/5 hover:text-primary rounded-lg text-left">
+                            快速連結
+                            <i class="fa fa-chevron-down text-xs transition-transform duration-200"></i>
+                        </button>
+                        <div class="mobile-dropdown-menu hidden pl-6 border-l-2 border-primary/20 mt-1 space-y-1">
+                            <a href="resources.html" class="block py-2 px-4 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">學習資源</a>
+                            <a href="gallery.html" class="block py-2 px-4 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班級相冊</a>
+                            <a href="committee.html" class="block py-2 px-4 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">班會幹事</a>
+                            <a href="info.html" class="block py-2 px-4 text-sm text-dark hk-hover hover:bg-primary/5 hover:text-primary">學校資訊</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 其他菜單項 -->
+                    <a href="#contact" class="block py-3 px-4 font-medium text-dark hk-hover hover:bg-primary/5 hover:text-primary rounded-lg">聯絡我們</a>
+                    <a href="admin.html" id="mobile-admin-entry" class="hidden py-3 px-4 font-medium text-dark hk-hover hover:bg-primary/5 hover:text-primary rounded-lg">
+                        <i class="fa fa-cog mr-2"></i>後台管理
+                    </a>
+                    <a href="#" id="mobile-logout-btn" class="block py-3 px-4 font-medium text-dark hk-hover hover:bg-primary/5 hover:text-primary rounded-lg flex items-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i> 登出
+                    </a>
+                    <a href="#suggestion" class="block py-3 px-4 font-medium text-primary hk-hover hover:bg-primary/5 rounded-lg">
+                        <i class="fa fa-pencil mr-2"></i>意見反映
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 首頁輪播：減弱漸變與動效，更符合香港網站的「實景優先」 -->
+        <section id="home" class="anchor-target relative h-[280px] sm:h-[380px] md:h-[480px] lg:h-[580px] overflow-hidden">
+            <div id="slider" class="w-full h-full">
+                <!-- 輪播項目 1 -->
+                <div class="slider-item absolute inset-0 opacity-100 transition-opacity duration-800"> <!-- 減少過渡時間，更流暢不誇張 -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-primary/70 to-transparent z-10"></div>
+                    <img src="https://picsum.photos/id/20/1600/900" alt="校園文化節" class="w-full h-full object-cover">
+                    <div class="absolute top-0 left-0 w-full h-full z-20 flex items-center">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="max-w-lg text-white">
+                                <h2 class="text-[clamp(1.4rem,4vw,3rem)] font-bold leading-tight text-shadow-lg mb-3">
+                                    3D壁報設計
+                                </h2>
+                                <p class="text-[clamp(0.8rem,2vw,1.1rem)] text-shadow mb-4">
+                                    承夢前行創輝煌，繼往開來展未來，校慶共築夢想之路。
+                                </p>
+                                <a href="#" class="inline-block bg-white text-primary hk-hover hover:bg-gray-100 font-medium px-5 py-2.5 rounded-lg">
+                                    設計預覽 <i class="fa fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 輪播項目 2 -->
+                <div class="slider-item absolute inset-0 opacity-0 transition-opacity duration-800">
+                    <div class="absolute inset-0 bg-gradient-to-r from-dark/60 to-transparent z-10"></div>
+                    <img src="https://picsum.photos/id/24/1600/900" alt="班級相簿" class="w-full h-full object-cover">
+                    <div class="absolute top-0 left-0 w-full h-full z-20 flex items-center">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="max-w-lg text-white">
+                                <h2 class="text-[clamp(1.4rem,4vw,3rem)] font-bold leading-tight text-shadow-lg mb-3">
+                                    班級相簿
+                                </h2>
+                                <p class="text-[clamp(0.8rem,2vw,1.1rem)] text-shadow mb-4">
+                                    班級相簿是我們共同的回憶，記錄著每一個珍貴的瞬間，讓我們一起珍惜這些美好的時光。
+                                </p>
+                                <a href="gallery.html" class="inline-block bg-white text-primary hk-hover hover:bg-gray-100 font-medium px-5 py-2.5 rounded-lg">
+                                    進入相簿 <i class="fa fa-file-text-o ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 輪播項目 3 -->
+                <div class="slider-item absolute inset-0 opacity-0 transition-opacity duration-800">
+                    <div class="absolute inset-0 bg-gradient-to-r from-secondary/70 to-transparent z-10"></div>
+                    <img src="https://picsum.photos/id/42/1600/900" alt="學生服務中心" class="w-full h-full object-cover">
+                    <div class="absolute top-0 left-0 w-full h-full z-20 flex items-center">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="max-w-lg text-white">
+                                <h2 class="text-[clamp(1.4rem,4vw,3rem)] font-bold leading-tight text-shadow-lg mb-3">
+                                    學生服務中心
+                                </h2>
+                                <p class="text-[clamp(0.8rem,2vw,1.1rem)] text-shadow mb-4">
+                                    課業輔導、生活諮詢、獎助學金申請一站式服務
+                                </p>
+                                <a href="#services" class="inline-block bg-white text-secondary hk-hover hover:bg-gray-100 font-medium px-5 py-2.5 rounded-lg">
+                                    服務一覽 <i class="fa fa-list-ul ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-6 left-0 right-0 z-30 flex justify-center space-x-3"> <!-- 減少點間距 -->
+                <button class="slider-dot w-3.5 h-3.5 rounded-full bg-white opacity-100"></button>
+                <button class="slider-dot w-3.5 h-3.5 rounded-full bg-white opacity-50"></button>
+                <button class="slider-dot w-3.5 h-3.5 rounded-full bg-white opacity-50"></button>
+            </div>
+
+        </section>
+
+        <!-- 最新公告：港式佈局，簡化卡片 -->
+        <section id="announcements" class="anchor-target section-padding bg-neutral">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-center">最新公告</h2>
+                <div class="section-divider bg-primary"></div>
+                
+                <div id="announcement-list" class="bg-white rounded-lg card-shadow p-5 md:p-7 mt-8">
+                    <div class="animate-pulse py-3 border-b border-grayHK">
+                        <div class="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
+                        <div class="h-4 bg-gray-100 rounded w-1/4 mb-2"></div>
+                        <div class="h-4 bg-gray-100 rounded w-full"></div>
+                    </div>
+                    <div class="animate-pulse py-3 border-b border-grayHK">
+                        <div class="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
+                        <div class="h-4 bg-gray-100 rounded w-1/4 mb-2"></div>
+                        <div class="h-4 bg-gray-100 rounded w-5/6"></div>
+                    </div>
+                    <div class="animate-pulse py-3">
+                        <div class="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
+                        <div class="h-4 bg-gray-100 rounded w-1/4 mb-2"></div>
+                        <div class="h-4 bg-gray-100 rounded w-4/5"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 關於我們：簡化布局，強調資訊清晰 -->
+        <section id="about" class="anchor-target section-padding bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-10"> <!-- 減少下邊距 -->
+                    <h2 class="text-[clamp(1.4rem,3vw,2.2rem)] font-bold text-dark mb-3">關於我們</h2>
+                    <div class="section-divider bg-primary"></div>
+                </div>
+                
+                <!-- 班主任 -->
+                <div id="about-teachers" class="anchor-target mt-14"> <!-- 減少上邊距 -->
+                    <h3 class="text-xl font-semibold text-center mb-8">班主任</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-7 max-w-2xl mx-auto"> <!-- 減少間距 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-36 h-36 mx-auto mb-3 rounded-full overflow-hidden border-3 border-primary/20"> <!-- 略縮小、減少邊框粗細 -->
+                                <img src="https://cdn-icons-png.flaticon.com/512/12034/12034958.png" alt="班主任照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">吳凱翎老師</h4>
+                            <p class="text-primary text-sm mt-1">班主任 | 英文老師 | 歷史老師</p>
+                        </div>
+                        <div class="text-center scale-hover">
+                            <div class="relative w-36 h-36 mx-auto mb-3 rounded-full overflow-hidden border-3 border-primary/20">
+                                <img src="https://cdn-icons-png.flaticon.com/512/12034/12034946.png" alt="副班主任照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">黃勁權老師</h4>
+                            <p class="text-primary text-sm mt-1">班主任 | 數學科老師</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 班會幹事 -->
+                <div id="about-committee" class="anchor-target mt-16"> <!-- 減少上邊距 -->
+                    <h3 class="text-xl font-semibold text-center mb-8">現任班會幹事</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5"> <!-- 減少間距 -->
+                        <!-- 成員 1 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-3 border-neutral">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4478/4478358.png" alt="會長照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">許紫妮</h4>
+                            <p class="text-primary text-sm">班長</p>
+                            <p class="text-secondary text-sm">班級管理與領導</p>
+                        </div>
+                        
+                        <!-- 成員 2 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-3 border-neutral">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4478/4478344.png" alt="副會長照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">阮文謙</h4>
+                            <p class="text-primary text-sm">班長</p>
+                            <p class="text-secondary text-sm">班級管理與領導</p>
+                        </div>
+                        
+                        <!-- 成員 3 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-3 border-neutral">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4478/4478344.png" alt="秘書長照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">曾泯豪</h4>
+                            <p class="text-primary text-sm">班長</p>
+                            <p class="text-secondary text-sm">班級管理與領導</p>
+                        </div>
+                        
+                        <!-- 成員 4 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-3 border-neutral">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4478/4478358.png" alt="美術幹事照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">梁穎珈</h4>
+                            <p class="text-primary text-sm">班會主席</p>
+                            <p class="text-secondary text-sm">主持會議及帶領班會</p>
+                        </div>
+                        
+                        <!-- 成員 5 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-3 border-neutral">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4478/4478344.png" alt="體育幹事照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">羅卓熹</h4>
+                            <p class="text-primary text-sm">班會康樂</p>
+                            <p class="text-secondary text-sm">策劃及組織班級活動</p>
+                        </div>
+                        
+                        <!-- 成員 6 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-3 border-neutral">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4478/4478358.png" alt="IT幹事照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">敖塇苗</h4>
+                            <p class="text-primary text-sm">班會文書</p>
+                            <p class="text-secondary text-sm">負責班會文件及記錄</p>
+                        </div>
+                        
+                        <!-- 成員 7 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-3 border-neutral">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4478/4478358.png" alt="總務幹事照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">范琇瑜</h4>
+                            <p class="text-primary text-sm">班會總務</p>
+                            <p class="text-secondary text-sm">管理班會資源分配</p>
+                        </div>
+                    
+                        <!-- 成員 8 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-3 border-neutral">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4478/4478344.png" alt="宣傳幹事照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">鍾卓軒</h4>
+                            <p class="text-primary text-sm">班會財政</p>
+                            <p class="text-secondary text-sm">負責班會財政管理</p>
+                        </div>
+
+                        <!-- 成員 9 -->
+                        <div class="text-center scale-hover">
+                            <div class="relative w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden border-3 border-neutral">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4478/4478358.png" alt="宣傳幹事照片" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-semibold text-lg">葉梓淇</h4>
+                            <p class="text-primary text-sm">班會美術</p>
+                            <p class="text-secondary text-sm">負責班會視覺設計</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 班級上課時間表 -->
+                <div id="about-timetable" class="anchor-target mt-16">
+                    <h3 class="text-xl font-semibold text-center mb-8">班級上課時間表</h3>
+                    
+                    <div class="overflow-x-auto bg-white rounded-lg card-shadow">
+                        <table class="w-full text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-primary text-white">
+                                    <th class="px-3 py-2 text-left font-semibold min-w-[120px]">上課時間</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第1日</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第2日</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第3日</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第4日</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第5日</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第6日</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第7日</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第8日</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第9日</th>
+                                    <th class="px-2 py-2 text-center font-semibold min-w-[60px]">第10日</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs md:text-sm">
+                                <tr class="bg-secondary/10 border-b border-grayHK">
+                                    <td class="px-3 py-2 font-semibold text-dark">上午 8:00-8:10</td>
+                                    <td colspan="10" class="px-2 py-2 text-center text-dark">早會</td>
+                                </tr>
+                                <tr class="bg-secondary/10 border-b border-grayHK">
+                                    <td class="px-3 py-2 font-semibold text-dark">上午 8:10-8:30</td>
+                                    <td colspan="10" class="px-2 py-2 text-center text-dark">班主任</td>
+                                </tr>
+                                <tr class="border-b border-grayHK hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-semibold text-dark">上午 8:30-9:05</td>
+                                    <td class="px-2 py-2 text-center">物理</td>
+                                    <td class="px-2 py-2 text-center">歷史</td>
+                                    <td class="px-2 py-2 text-center">生物</td>
+                                    <td class="px-2 py-2 text-center">價值教育</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">中史</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">歷史</td>
+                                </tr>
+                                <tr class="border-b border-grayHK hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-semibold text-dark">上午 9:05-9:40</td>
+                                    <td class="px-2 py-2 text-center">物理</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">生物</td>
+                                    <td class="px-2 py-2 text-center">價值教育</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">公經社</td>
+                                </tr>
+                                <tr class="bg-secondary/10 border-b border-grayHK">
+                                    <td class="px-3 py-2 font-semibold text-dark">上午 9:40-10:00</td>
+                                    <td colspan="10" class="px-2 py-2 text-center text-dark">小息</td>
+                                </tr>
+                                <tr class="border-b border-grayHK hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-semibold text-dark">上午 10:00-10:35</td>
+                                    <td class="px-2 py-2 text-center">地理</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">體育</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">歷史</td>
+                                    <td class="px-2 py-2 text-center">綜合科技</td>
+                                    <td class="px-2 py-2 text-center">學習技能</td>
+                                    <td class="px-2 py-2 text-center">體育</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                </tr>
+                                <tr class="border-b border-grayHK hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-semibold text-dark">上午 10:35-11:10</td>
+                                    <td class="px-2 py-2 text-center">普通電腦</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">體育</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">公經社</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">體育</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                </tr>
+                                <tr class="border-b border-grayHK hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-semibold text-dark">上午 11:10-11:45</td>
+                                    <td class="px-2 py-2 text-center">中史</td>
+                                    <td class="px-2 py-2 text-center">生物</td>
+                                    <td class="px-2 py-2 text-center">中史</td>
+                                    <td class="px-2 py-2 text-center">音樂</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">普通電腦</td>
+                                    <td class="px-2 py-2 text-center">地理</td>
+                                    <td class="px-2 py-2 text-center">視藝</td>
+                                    <td class="px-2 py-2 text-center">化學</td>
+                                </tr>
+                                <tr class="bg-secondary/10 border-b border-grayHK">
+                                    <td class="px-3 py-2 font-semibold text-dark">上午 11:45-12:00</td>
+                                    <td colspan="10" class="px-2 py-2 text-center text-dark">小息</td>
+                                </tr>
+                                <tr class="border-b border-grayHK hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-semibold text-dark">下午 12:00-12:35</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">綜合科技</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">視藝</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">化學</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">音樂</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                </tr>
+                                <tr class="border-b border-grayHK hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-semibold text-dark">下午 12:35-13:10</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">綜合科技</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">視藝</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">化學</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">綜合科技</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                </tr>
+                                <tr class="bg-secondary/10 border-b border-grayHK">
+                                    <td class="px-3 py-2 font-semibold text-dark">下午 13:10-14:15</td>
+                                    <td colspan="10" class="px-2 py-2 text-center text-dark">午膳</td>
+                                </tr>
+                                <tr class="bg-secondary/10 border-b border-grayHK">
+                                    <td class="px-3 py-2 font-semibold text-dark">下午 14:15-14:20</td>
+                                    <td colspan="10" class="px-2 py-2 text-center text-dark">點名時段</td>
+                                </tr>
+                                <tr class="border-b border-grayHK hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-semibold text-dark">下午 14:20-14:55</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">視藝</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">地理</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">歷史</td>
+                                    <td class="px-2 py-2 text-center">公經社</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">全方</td>
+                                </tr>
+                                <tr class="border-b border-grayHK hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-semibold text-dark">下午 14:55-15:30</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">視藝</td>
+                                    <td class="px-2 py-2 text-center">英文</td>
+                                    <td class="px-2 py-2 text-center">數學</td>
+                                    <td class="px-2 py-2 text-center">物理</td>
+                                    <td class="px-2 py-2 text-center">中史</td>
+                                    <td class="px-2 py-2 text-center">地理</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">中文</td>
+                                    <td class="px-2 py-2 text-center">全方</td>
+                                </tr>
+                                <tr class="bg-secondary/10">
+                                    <td class="px-3 py-2 font-semibold text-dark">下午 15:30-15:45</td>
+                                    <td colspan="10" class="px-2 py-2 text-center text-dark">班主任節</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+        </section>
+
+        <!-- 精選回憶：保留主版面風格並加入動態預覽 -->
+        <section id="memories" class="anchor-target section-padding bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-end gap-3 mb-8">
+                    <div>
+                        <h2 class="text-[clamp(1.4rem,3vw,2.2rem)] font-bold text-dark">精選回憶</h2>
+                        <p class="text-gray-500 mt-1">記錄班級活動每一個珍貴時刻</p>
+                    </div>
+                    <a href="gallery.html" class="inline-flex items-center text-primary font-medium hk-hover hover:text-secondary">
+                        查看全部相簿 <i class="fa fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                <div id="preview-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="animate-pulse bg-gray-100 aspect-square rounded-lg"></div>
+                    <div class="animate-pulse bg-gray-100 aspect-square rounded-lg"></div>
+                    <div class="animate-pulse bg-gray-100 aspect-square rounded-lg"></div>
+                    <div class="animate-pulse bg-gray-100 aspect-square rounded-lg"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 快速連結：港式命名，簡化卡片 -->
+        <section id="links" class="anchor-target section-padding bg-neutral">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-10">
+                    <h2 class="text-[clamp(1.4rem,3vw,2.2rem)] font-bold text-dark mb-3">快速連結</h2>
+                    <div class="section-divider bg-primary"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-7"> <!-- 減少間距 -->
+                    <div class="space-y-5"> <!-- 減少行間距 -->
+                        <!-- 服務 1 -->
+                        <div class="bg-white p-5 rounded-lg shadow-md flex flex-col sm:flex-row scale-hover"> <!-- 減少內邊距 -->
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 mx-auto sm:mx-0"> <!-- 略縮小圖標容器 -->
+                                <i class="fa fa-book text-xl text-primary"></i> <!-- 略縮小圖標 -->
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-center sm:text-left">學習資源</h3>
+                                <p class="text-gray-600 text-center sm:text-left">提供課程大綱、教材補充、作業參考等學習資源。</p>
+                                <a href="resources.html" class="inline-flex items-center text-primary font-medium hover:underline mt-2 justify-center sm:justify-start">
+                                    學習資源 <i class="fa fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- 服務 2 -->
+                        <div class="bg-white p-5 rounded-lg shadow-md flex flex-col sm:flex-row scale-hover">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 mx-auto sm:mx-0">
+                                <i class="fa fa-camera text-xl text-primary"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-center sm:text-left">班級相冊</h3>
+                                <p class="text-gray-600 text-center sm:text-left">瀏覽班級活動相片、合照，記錄美好回憶。</p>
+                                <a href="gallery.html" class="inline-flex items-center text-primary font-medium hover:underline mt-2 justify-center sm:justify-start">
+                                    瀏覽相簿 <i class="fa fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-5">
+                        <!-- 服務 3 -->
+                        <div class="bg-white p-5 rounded-lg shadow-md flex flex-col sm:flex-row scale-hover">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 mx-auto sm:mx-0">
+                                <i class="fa fa-users text-xl text-primary"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-center sm:text-left">班會幹事</h3>
+                                <p class="text-gray-600 text-center sm:text-left">負責班級事務的學生代表，協助班主任管理班級活動。</p>
+                                <a href="committee.html" class="inline-flex items-center text-primary font-medium hover:underline mt-2 justify-center sm:justify-start">
+                                    查看幹事名單 <i class="fa fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- 服務 4 -->
+                        <div class="bg-white p-5 rounded-lg shadow-md flex flex-col sm:flex-row scale-hover">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 mx-auto sm:mx-0">
+                                <i class="fa fa-info-circle text-xl text-primary"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-center sm:text-left">學校資訊</h3>
+                                <p class="text-gray-600 text-center sm:text-left">查閱學校最新動態、活動資訊等內容。</p>
+                                <a href="info.html" class="inline-flex items-center text-primary font-medium hover:underline mt-2 justify-center sm:justify-start">
+                                    學校資訊 <i class="fa fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 意見反映：港式術語，簡化樣式 -->
+        <section id="suggestion" class="anchor-target section-padding bg-primary text-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center mb-10">
+                    <h2 class="text-[clamp(1.4rem,3vw,2.2rem)] font-bold mb-3">意見反映</h2>
+                    <div class="section-divider bg-white"></div>
+                    <p class="px-2">需以學校電郵登入填寫 Google Form</p>
+                </div>
+                
+                <div class="max-w-2xl mx-auto">
+                    <iframe 
+                        src="https://docs.google.com/forms/d/e/1FAIpQLSdqXdGJAw1RHhhFII2oKppML-DPgblundpYjLs6GrW-AHozzw/viewform?embedded=true"
+                        class="w-full min-h-[580px] bg-white rounded-lg shadow-md" <!-- 淺化陰影、略減高度 -->
+                        frameborder="0" 
+                        marginheight="0" 
+                        marginwidth="0">
+                        載入中...
+                    </iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- 聯絡我們：港式聯繫方式，簡化表單 -->
+        <section id="contact" class="anchor-target section-padding bg-neutral">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-center">聯絡我們</h2>
+                <div class="section-divider bg-primary"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8"> <!-- 減少間距與上邊距 -->
+                    <div>
+                        <div class="bg-white rounded-lg card-shadow p-5 md:p-7 h-full"> <!-- 減少內邊距 -->
+                            <h3 class="text-xl font-bold text-primary mb-5">聯絡信息</h3>
+                            
+                            <div class="space-y-3"> <!-- 減少行間距 -->
+                                <div class="flex items-start">
+                                    <div class="bg-primary/10 p-2 rounded-lg mr-3"> <!-- 減少內邊距 -->
+                                        <i class="fa fa-map-marker text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">學校地址</h4>
+                                        <p class="text-gray-600">香港九龍灣宏照道38號</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="bg-primary/10 p-2 rounded-lg mr-3">
+                                        <i class="fa fa-phone text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">聯絡電話（港式格式）</h4>
+                                        <p class="text-gray-600">2345 6789（港式：去除連字符，用空格分隔）</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="bg-primary/10 p-2 rounded-lg mr-3">
+                                        <i class="fa fa-envelope-o text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">電子郵箱</h4>
+                                        <p class="text-gray-600">3d@kywc.edu.hk</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="bg-primary/10 p-2 rounded-lg mr-3">
+                                        <i class="fa fa-clock-o text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">上課時間</h4>
+                                        <p class="text-gray-600">星期一至星期五：上午8時至下午4時（港式：數字→中文時刻表述）</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6"> <!-- 減少上邊距 -->
+                                <h4 class="font-semibold mb-3">關注我們</h4>
+                                <div class="flex space-x-3"> <!-- 減少圖標間距 -->
+                                    <a href="#" class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hk-hover hover:bg-secondary">
+                                        <i class="fa fa-facebook"></i>
+                                    </a>
+                                    <a href="#" class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hk-hover hover:bg-secondary">
+                                        <i class="fa fa-instagram"></i>
+                                    </a>
+                                    <a href="#" class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hk-hover hover:bg-secondary">
+                                        <i class="fa fa-wechat"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="bg-white rounded-lg card-shadow p-5 md:p-7 h-full">
+                            <h3 class="text-xl font-bold text-primary mb-5">班級合照</h3>
+                            
+                            <div class="w-full rounded-lg overflow-hidden shadow-md">
+                                <img src="images\events\未命名設計 (2).png" alt="3D班級合照" class="w-full h-auto object-cover">
+                            </div>
+                            
+                            <p class="text-gray-600 text-center mt-4">
+                                這是我們3D班的集體合照，記錄著全班同學的美好回憶。
+                            </p>
+                        </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 頁腳：港式簡約，強調資訊清晰 -->
+        <footer class="bg-dark text-white py-8"> <!-- 減少上下內邊距 -->
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-7"> <!-- 減少間距 -->
+                    <div>
+                        <div class="flex items-center space-x-2 mb-3"> <!-- 減少下邊距 -->
+                            <div class="bg-white text-primary p-1.5 rounded-lg"> <!-- 減少內邊距 -->
+                                <i class="fa fa-graduation-cap text-lg"></i> <!-- 略縮小圖標 -->
+                            </div>
+                            <h3 class="text-lg font-bold">KYWC_3D班網</h3>
+                        </div>
+                        <p class="text-gray-400 text-sm">
+                            團結互助，共創輝煌，我們的班級故事從這裡開始。
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">快速連結</h4>
+                        <ul class="space-y-1 text-gray-400"> <!-- 減少行間距 -->
+                            <li><a href="#home" class="hk-hover hover:text-white">首頁</a></li>
+                            <li><a href="#announcements" class="hk-hover hover:text-white">最新公告</a></li>
+                            <li><a href="#about" class="hk-hover hover:text-white">關於我們</a></li>
+                            <li><a href="#links" class="hk-hover hover:text-white">快速連結</a></li>
+                            <li><a href="#contact" class="hk-hover hover:text-white">聯絡我們</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">相關資源</h4>
+                        <ul class="space-y-1 text-gray-400">
+                            <li><a href="resources.html" class="hk-hover hover:text-white">學習資源</a></li>
+                            <li><a href="gallery.html" class="hk-hover hover:text-white">班級相冊</a></li>
+                            <li><a href="committee.html" class="hk-hover hover:text-white">班會幹事</a></li>
+                            <li><a href="info.html" class="hk-hover hover:text-white">學校資訊</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">聯繫admin</h4>
+                        <ul class="space-y-1 text-gray-400">
+                            <li class="flex items-center">
+                                <i class="fa fa-envelope-o mr-2 w-5"></i>
+                                <span class="text-gray-400">admin@kywc3d.qzz.io</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fa fa-instagram mr-2 w-5"></i>
+                                <a href="https://www.instagram.com/kywc_3d/" class="hk-hover hover:text-white">kywc_3d</a>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fa fa-whatsapp mr-2 w-5 text-green-400"></i>
+                                <a href="https://wa.me/85292683237" aria-label="WhatsApp" class="hk-hover hover:text-white">852 9268 3237（港式電話格式）</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-500 text-sm"> <!-- 減少上下邊距 -->
+                    <p>&copy; 2025 KYWC_3D班網. 保留所有權利。（港式版權表述）</p>
+                </div>
+                <div class="text-center mt-3"> <!-- 減少上邊距 -->
+                    <a href="#home" class="inline-block bg-primary text-white hk-hover hover:bg-secondary font-medium px-5 py-2 rounded-lg">
+                        返回頂部 <i class="fa fa-arrow-up ml-2"></i>
+                    </a>
+                </div>
+                </div>  
+                <div id="footer-bottom"></div>
+            </div>
+        </footer>
+    </div>
+
+    <script type="module">
+        import { PHOTOS_API_BASE, PHOTOS_API_ENABLED, db } from "./firebase-config.js";
+        import {
+            collection,
+            limit,
+            onSnapshot,
+            orderBy,
+            query,
+            where
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        document.addEventListener('DOMContentLoaded', function() {
+            function escapeHTML(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function formatAnnouncementDate(item) {
+                const rawDate = item?.publishAt ?? item?.createdAt ?? item?.updatedAt ?? item?.date ?? null;
+                if (!rawDate) return '待更新';
+
+                if (typeof rawDate === 'string') return rawDate;
+
+                if (rawDate?.toDate instanceof Function) {
+                    const dateObj = rawDate.toDate();
+                    return dateObj.toLocaleDateString('zh-HK', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
+                }
+
+                if (rawDate instanceof Date) {
+                    return rawDate.toLocaleDateString('zh-HK', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
+                }
+
+                return '待更新';
+            }
+
+            function renderAnnouncementItems(container, items) {
+                container.innerHTML = items.map((item, index) => `
+                    <div class="announcement-item py-3 ${index < items.length - 1 ? 'border-b border-grayHK' : ''} hover:bg-gray-50 rounded-lg p-2 hk-hover">
+                        <h3 class="text-xl font-semibold text-primary mb-2">${escapeHTML(item.title ?? '未命名公告')}</h3>
+                        <div class="text-gray-500 text-sm mb-2">
+                            <i class="fa fa-calendar-o mr-2"></i> ${escapeHTML(formatAnnouncementDate(item))} |
+                            <i class="fa fa-user-o mr-2 ml-2"></i> ${escapeHTML(item.author ?? item.cat ?? '班級管理組')}
+                        </div>
+                        <p class="text-gray-600">${escapeHTML(item.content ?? '')}</p>
+                    </div>
+                `).join('') + `
+                    <div class="text-center mt-6">
+                        <a href="announcements.html" class="inline-block border border-primary text-primary hk-hover hover:bg-primary hover:text-white px-5 py-2.5 rounded-lg">
+                            查看全部公告 <i class="fa fa-list-ul ml-2"></i>
+                        </a>
+                    </div>
+                `;
+            }
+
+            async function loadPreview() {
+                const grid = document.getElementById('preview-grid');
+                if (!grid) return;
+                if (!PHOTOS_API_ENABLED) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-gray-500">
+                            相簿預覽目前未啟用照片 API。
+                        </div>
+                    `;
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`${PHOTOS_API_BASE}/photos`);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const urls = await res.json();
+                    const latest = Array.isArray(urls) ? urls.slice(-4).reverse() : [];
+
+                    if (!latest.length) throw new Error('No photo data');
+
+                    grid.innerHTML = latest.map((url) => `
+                        <div class="group relative overflow-hidden rounded-lg card-shadow aspect-square bg-gray-100">
+                            <img src="${escapeHTML(url)}" alt="班級相片" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
+                            <div class="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-gray-500">
+                            相簿預覽暫時未能載入，請稍後再試。
+                        </div>
+                    `;
+                }
+            }
+
+            function loadAnnouncements() {
+                const container = document.getElementById('announcement-list');
+                if (!container) return;
+
+                const pinnedFirstQuery = query(
+                    collection(db, 'announcements'),
+                    where('published', '==', true),
+                    orderBy('pinned', 'desc'),
+                    orderBy('publishAt', 'desc'),
+                    limit(3)
+                );
+                const fallbackQuery = query(
+                    collection(db, 'announcements'),
+                    where('published', '==', true),
+                    orderBy('publishAt', 'desc'),
+                    limit(3)
+                );
+
+                const subscribe = (targetQuery, isFallback = false) => onSnapshot(
+                    targetQuery,
+                    (snapshot) => {
+                        const items = snapshot.docs.map((doc) => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        if (!items.length) {
+                            container.innerHTML = `
+                                <div class="text-center py-8 text-gray-500">
+                                    目前沒有已發布公告。
+                                </div>
+                                <div class="text-center mt-2">
+                                    <a href="announcements.html" class="inline-block border border-primary text-primary hk-hover hover:bg-primary hover:text-white px-5 py-2.5 rounded-lg">
+                                        查看全部公告 <i class="fa fa-list-ul ml-2"></i>
+                                    </a>
+                                </div>
+                            `;
+                            return;
+                        }
+                        renderAnnouncementItems(container, items);
+                    },
+                    (error) => {
+                        console.error('[Announcements] Firestore 實時監聽失敗:', error);
+                        if (!isFallback && error?.code === 'failed-precondition') {
+                            subscribe(fallbackQuery, true);
+                            return;
+                        }
+                        container.innerHTML = `
+                            <div class="text-center py-8 text-red-500">
+                                公告同步失敗：${escapeHTML(error?.message || '未知錯誤')}
+                            </div>
+                            <div class="text-center mt-2">
+                                <a href="announcements.html" class="inline-block border border-primary text-primary hk-hover hover:bg-primary hover:text-white px-5 py-2.5 rounded-lg">
+                                    查看全部公告 <i class="fa fa-list-ul ml-2"></i>
+                                </a>
+                            </div>
+                        `;
+                    }
+                );
+
+                subscribe(pinnedFirstQuery, false);
+            }
+
+            loadPreview();
+            loadAnnouncements();
+
+            // 1. 移動端菜單切換
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            });
+
+            // 2. 移動端下拉菜單交互（簡化過渡時間）
+            const dropdownToggles = document.querySelectorAll('.mobile-dropdown-toggle');
+            
+            dropdownToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const menu = this.nextElementSibling;
+                    const arrow = this.querySelector('i');
+                    
+                    // 關閉其他下拉菜單
+                    dropdownToggles.forEach(otherToggle => {
+                        if (otherToggle !== toggle) {
+                            otherToggle.nextElementSibling.classList.add('hidden');
+                            otherToggle.querySelector('i').classList.remove('rotate-180');
+                        }
+                    });
+                    
+                    // 切換當前菜單
+                    menu.classList.toggle('hidden');
+                    arrow.classList.toggle('rotate-180');
+                });
+            });
+
+            // 3. 點擊外部關閉移動端菜單
+            document.addEventListener('click', function(e) {
+                const isClickInsideMenu = mobileMenu.contains(e.target);
+                const isClickOnToggle = menuToggle.contains(e.target);
+                
+                if (!isClickInsideMenu && !isClickOnToggle && !mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                    menuToggle.querySelector('i').classList.remove('fa-times');
+                    menuToggle.querySelector('i').classList.add('fa-bars');
+                    
+                    // 關閉所有下拉菜單
+                    document.querySelectorAll('.mobile-dropdown-menu').forEach(menu => {
+                        menu.classList.add('hidden');
+                    });
+                    document.querySelectorAll('.mobile-dropdown-toggle i').forEach(arrow => {
+                        arrow.classList.remove('rotate-180');
+                    });
+                }
+            });
+
+            // 4. 窗口大小變化重置菜單
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    mobileMenu.classList.add('hidden');
+                    menuToggle.querySelector('i').classList.remove('fa-times');
+                    menuToggle.querySelector('i').classList.add('fa-bars');
+                    
+                    document.querySelectorAll('.mobile-dropdown-menu').forEach(menu => {
+                        menu.classList.add('hidden');
+                    });
+                    document.querySelectorAll('.mobile-dropdown-toggle i').forEach(arrow => {
+                        arrow.classList.remove('rotate-180');
+                    });
+                }
+            });
+
+            // 5. 平滑滾動與錨點定位修復
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    
+                    // 如果是僅僅是 # 則不執行
+                    if(href === '#') return;
+
+                    e.preventDefault();
+                    
+                    const targetElement = document.querySelector(href);
+                    
+                    if (targetElement) {
+                        // 關閉移動菜單
+                        if (!mobileMenu.classList.contains('hidden')) {
+                            mobileMenu.classList.add('hidden');
+                            menuToggle.querySelector('i').classList.remove('fa-times');
+                            menuToggle.querySelector('i').classList.add('fa-bars');
+                        }
+
+                        // 使用 scrollIntoView 進行平滑滾動
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // 6. 輪播功能（簡化自動播放間隔，更流暢）
+            const sliderItems = document.querySelectorAll('.slider-item');
+            const sliderDots = document.querySelectorAll('.slider-dot');
+            const prevSlide = document.getElementById('prev-slide');
+            const nextSlide = document.getElementById('next-slide');
+            let currentSlide = 0;
+            let slideInterval;
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            function handleSwipe() {
+                if (touchEndX - touchStartX > 50) prevSlideFunc();
+                if (touchStartX - touchEndX > 50) nextSlideFunc();
+            }
+            
+            const slider = document.getElementById('slider');
+            if(slider) {
+                slider.addEventListener('touchstart', e => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, false);
+                
+                slider.addEventListener('touchend', e => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                    clearInterval(slideInterval);
+                    startSlideInterval();
+                }, false);
+            }
+            
+            function showSlide(index) {
+                sliderItems.forEach(item => {
+                    item.classList.add('opacity-0');
+                    item.classList.remove('opacity-100');
+                });
+                sliderDots.forEach(dot => {
+                    dot.classList.remove('opacity-100');
+                    dot.classList.add('opacity-50');
+                });
+                sliderItems[index].classList.remove('opacity-0');
+                sliderItems[index].classList.add('opacity-100');
+                sliderDots[index].classList.remove('opacity-50');
+                sliderDots[index].classList.add('opacity-100');
+                currentSlide = index;
+            }
+            
+            function nextSlideFunc() {
+                let newIndex = currentSlide + 1;
+                if (newIndex >= sliderItems.length) newIndex = 0;
+                showSlide(newIndex);
+            }
+            
+            function prevSlideFunc() {
+                let newIndex = currentSlide - 1;
+                if (newIndex < 0) newIndex = sliderItems.length - 1;
+                showSlide(newIndex);
+            }
+            
+            // 港式網站：自動播放間隔略延長，減少打擾
+            function startSlideInterval() {
+                slideInterval = setInterval(nextSlideFunc, 6000);
+            }
+            
+            if(sliderItems.length > 0) {
+                startSlideInterval();
+                
+                sliderDots.forEach((dot, index) => {
+                    dot.addEventListener('click', () => {
+                        clearInterval(slideInterval);
+                        showSlide(index);
+                        startSlideInterval();
+                    });
+                });
+                
+                if (prevSlide && nextSlide) {
+                    prevSlide.addEventListener('click', () => {
+                        clearInterval(slideInterval);
+                        prevSlideFunc();
+                        startSlideInterval();
+                    });
+                    
+                    nextSlide.addEventListener('click', () => {
+                        clearInterval(slideInterval);
+                        nextSlideFunc();
+                        startSlideInterval();
+                    });
+                }
+            }
+
+            // 7. 登出按鈕功能（港式提示語）
+            const logoutBtn = document.getElementById('logout-btn');
+            if(logoutBtn) {
+                logoutBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    if (typeof window.handleLogout === "function") {
+                        await window.handleLogout();
+                    }
+                });
+            }
+            
+            const mobileLogout = document.getElementById('mobile-logout-btn');
+            if (mobileLogout) {
+                mobileLogout.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    mobileMenu.classList.add('hidden');
+                    menuToggle.querySelector('i').classList.remove('fa-times');
+                    menuToggle.querySelector('i').classList.add('fa-bars');
+                    
+                    if (typeof window.handleLogout === "function") {
+                        await window.handleLogout();
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script type="module">
+        // 等待認證系統初始化完成，使用 auth.js 中的全局變量
+        const authResult = await window.authReady;
+        
+        console.log("[Index] authReady 已解決:", { 
+            user: authResult.user?.email || "null",
+            isAdmin: authResult.isAdmin,
+            authInitialized: window.authInitialized
+        });
+
+        function setAdminEntryVisible(visible) {
+            const desktopAdmin = document.getElementById("admin-entry");
+            const mobileAdmin = document.getElementById("mobile-admin-entry");
+            if (visible) {
+                desktopAdmin?.classList.remove("hidden");
+                mobileAdmin?.classList.remove("hidden");
+            } else {
+                desktopAdmin?.classList.add("hidden");
+                mobileAdmin?.classList.add("hidden");
+            }
+        }
+
+        // 使用 auth.js 提供的全局變量
+        if (window.currentUser) {
+            console.log("[Index] 已認證用戶:", window.currentUser.email);
+            localStorage.setItem("firebaseUid", window.currentUser.uid);
+            localStorage.setItem("userRole", window.isAdmin ? "admin" : "student");
+            setAdminEntryVisible(window.isAdmin);
+        } else {
+            console.log("[Index] 未認證用戶");
+            localStorage.setItem("userRole", "student");
+            localStorage.removeItem("firebaseUid");
+            setAdminEntryVisible(false);
+        }
+    </script>
+</body>
+</html>

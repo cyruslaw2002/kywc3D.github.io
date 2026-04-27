@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理後台 - KYWC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="./auth.js"></script>
+    <style>
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        .is-ready { opacity: 1; }
+        #loading-screen {
+            position: fixed; inset: 0; background: #fff;
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div id="loading-screen">
+        <div class="text-gray-400">正在驗證管理員權限...</div>
+    </div>
+
+    <header class="bg-white border-b px-6 py-4 flex justify-between items-center">
+        <h1 class="font-bold text-lg">KYWC 管理後台</h1>
+        <button onclick="window.handleLogout()" class="text-red-600">登出</button>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 space-y-6">
+        <section class="bg-white border rounded p-4 space-y-2">
+            <h2 class="font-semibold">系統狀態</h2>
+            <div class="text-sm">
+                <div>API Base：<span id="api-base" class="font-mono"></span></div>
+                <div>目前使用者：<span id="current-user">檢查中...</span></div>
+                <div>管理員權限：<span id="admin-state">檢查中...</span></div>
+            </div>
+            <p id="global-error" class="hidden text-sm text-red-600"></p>
+            <p id="global-success" class="hidden text-sm text-green-600"></p>
+        </section>
+
+        <section class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white border rounded p-4 space-y-4">
+                <h3 class="font-semibold text-lg">學生帳戶管理</h3>
+                <form id="student-form" class="grid sm:grid-cols-2 gap-3">
+                    <input id="student-email" type="email" placeholder="學生 Email" class="border rounded px-3 py-2" required>
+                    <input id="student-password" type="text" placeholder="初始密碼（至少6位）" class="border rounded px-3 py-2" required>
+                    <input id="student-name" type="text" placeholder="學生姓名" class="border rounded px-3 py-2">
+                    <input id="student-class" type="text" placeholder="班別（例：3D）" value="3D" class="border rounded px-3 py-2">
+                    <button type="submit" class="sm:col-span-2 bg-blue-600 text-white rounded px-3 py-2 hover:bg-blue-700">建立學生帳戶</button>
+                </form>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">學生列表</h4>
+                        <button id="reload-students" class="text-sm bg-slate-700 text-white px-3 py-1 rounded">重新整理</button>
+                    </div>
+                    <p id="students-status" class="text-sm text-gray-600 mb-2">待載入...</p>
+                    <div id="students-list" class="space-y-2 max-h-[420px] overflow-auto"></div>
+                </div>
+            </div>
+
+            <div class="bg-white border rounded p-4 space-y-4">
+                <h3 class="font-semibold text-lg">相簿管理</h3>
+                <form id="photo-form" class="space-y-3">
+                    <input id="photo-file" type="file" accept="image/*" class="block w-full border rounded px-3 py-2" required>
+                    <button type="submit" class="bg-blue-600 text-white rounded px-3 py-2 hover:bg-blue-700">上傳相片</button>
+                </form>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">相片列表</h4>
+                        <button id="reload-photos" class="text-sm bg-slate-700 text-white px-3 py-1 rounded">重新整理</button>
+                    </div>
+                    <p id="photos-status" class="text-sm text-gray-600 mb-2">待載入...</p>
+                    <div id="photos-list" class="space-y-2 max-h-[420px] overflow-auto"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { API_BASE, API_ENABLED, PHOTOS_API_BASE, PHOTOS_API_ENABLED, db } from "./firebase-config.js";
+        import {
+            addDoc,
+            collection,
+            deleteDoc,
+            doc,
+            onSnapshot,
+            orderBy,
+            query,
+            serverTimestamp,
+            updateDoc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const apiBaseEl = document.getElementById("api-base");
+        const currentUserEl = document.getElementById("current-user");
+        const adminStateEl = document.getElementById("admin-state");
+        const globalErrorEl = document.getElementById("global-error");
+        const globalSuccessEl = document.getElementById("global-success");
+        const studentsStatusEl = document.getElementById("students-status");
+        const photosStatusEl = document.getElementById("photos-status");
+        const studentsListEl = document.getElementById("students-list");
+        const photosListEl = document.getElementById("photos-list");
+        const studentForm = document.getElementById("student-form");
+        const photoForm = document.getElementById("photo-form");
+        const reloadStudentsBtn = document.getElementById("reload-students");
+        const reloadPhotosBtn = document.getElementById("reload-photos");
+        let announcementsStatusEl;
+        let announcementsListEl;
+        let announcementForm;
+        let announcementSubmitBtn;
+        let announcementCancelEditBtn;
+        let unsubscribeAnnouncements = null;
+        let editingAnnouncementId = null;
+        const announcementMap = new Map();
+
+        apiBaseEl.textContent = API_ENABLED
+            ? API_BASE
+            : (PHOTOS_API_ENABLED ? `通用API未啟用；Photos API: ${PHOTOS_API_BASE}` : "未啟用（純 Firebase 模式）");
+
+        function escapeHTML(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function showError(message) {
+            globalSuccessEl.classList.add("hidden");
+            globalErrorEl.textContent = message;
+            globalErrorEl.classList.remove("hidden");
+        }
+
+        function showSuccess(message) {
+            globalErrorEl.classList.add("hidden");
+            globalSuccessEl.textContent = message;
+            globalSuccessEl.classList.remove("hidden");
+        }
+
+        async function request(path, options = {}) {
+            if (!API_ENABLED) {
+                throw new Error("純 Firebase 模式未啟用本地 API");
+            }
+            const token = await window.currentUser.getIdToken();
+            const headers = { Authorization: `Bearer ${token}`, ...(options.headers || {}) };
+            const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(`HTTP ${res.status} ${text}`);
+            }
+            if (res.status === 204) return null;
+            const type = res.headers.get("content-type") || "";
+            if (type.includes("application/json")) return res.json();
+            return res.text();
+        }
+
+        async function requestPhotos(path, options = {}) {
+            if (!PHOTOS_API_ENABLED) {
+                throw new Error("未啟用照片 API");
+            }
+            const token = await window.currentUser.getIdToken();
+            const headers = { Authorization: `Bearer ${token}`, ...(options.headers || {}) };
+            const res = await fetch(`${PHOTOS_API_BASE}${path}`, { ...options, headers });
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(`HTTP ${res.status} ${text}`);
+            }
+            if (res.status === 204) return null;
+            const type = res.headers.get("content-type") || "";
+            if (type.includes("application/json")) return res.json();
+            return res.text();
+        }
+
+        function studentCard(student) {
+            const uid = student.uid || student.id || "";
+            const email = student.email || "";
+            const name = student.name || "";
+            const className = student.className || "";
+            return `
+                <div class="border rounded p-3 bg-gray-50 space-y-2">
+                    <div class="text-sm"><span class="font-semibold">UID：</span>${uid}</div>
+                    <div class="text-sm"><span class="font-semibold">Email：</span>${email}</div>
+                    <div class="text-sm"><span class="font-semibold">姓名：</span>${name || "未設定"} / <span class="font-semibold">班別：</span>${className || "未設定"}</div>
+                    <div class="flex gap-2">
+                        <button data-action="reset-password" data-uid="${uid}" class="text-xs bg-amber-600 text-white px-2 py-1 rounded">重設密碼</button>
+                        <button data-action="delete-student" data-uid="${uid}" class="text-xs bg-red-600 text-white px-2 py-1 rounded">刪除學生</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function photoCard(photo) {
+            const key = photo.key || "";
+            const url = photo.url || "";
+            return `
+                <div class="border rounded p-3 bg-gray-50 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="text-sm font-semibold truncate">${key}</div>
+                        <a href="${url}" target="_blank" class="text-xs text-blue-700 truncate block">${url}</a>
+                    </div>
+                    <button data-action="delete-photo" data-key="${encodeURIComponent(key)}" class="text-xs bg-red-600 text-white px-2 py-1 rounded shrink-0">刪除</button>
+                </div>
+            `;
+        }
+
+        function announcementCard(item) {
+            const id = item.id || "";
+            const dateSource = item.publishAt || item.createdAt || item.updatedAt || item.date || null;
+            let dateText = "待更新";
+            if (typeof dateSource === "string") dateText = dateSource;
+            if (dateSource?.toDate instanceof Function) {
+                dateText = dateSource.toDate().toLocaleString("zh-HK", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                });
+            }
+
+            const statusBadge = item.published
+                ? '<span class="text-xs px-2 py-1 rounded bg-green-100 text-green-700">已發布</span>'
+                : '<span class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">草稿</span>';
+            const pinnedBadge = item.pinned
+                ? '<span class="text-xs px-2 py-1 rounded bg-indigo-100 text-indigo-700">置頂</span>'
+                : "";
+
+            return `
+                <div class="border rounded p-3 bg-gray-50 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="font-semibold">${escapeHTML(item.title || "未命名公告")}</div>
+                        <div class="flex items-center gap-1">${pinnedBadge}${statusBadge}</div>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        分類：${escapeHTML(item.category || "general")} | 作者：${escapeHTML(item.author || "管理員")} | 時間：${escapeHTML(dateText)}
+                    </div>
+                    <p class="text-sm text-gray-700 whitespace-pre-line">${escapeHTML(item.content || "")}</p>
+                    <div class="flex gap-2">
+                        <button data-action="edit-announcement" data-id="${escapeHTML(id)}" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">編輯</button>
+                        <button data-action="toggle-pin-announcement" data-id="${escapeHTML(id)}" data-pinned="${item.pinned ? "1" : "0"}" class="text-xs bg-indigo-600 text-white px-2 py-1 rounded">${item.pinned ? "取消置頂" : "設為置頂"}</button>
+                        <button data-action="toggle-publish-announcement" data-id="${escapeHTML(id)}" data-published="${item.published ? "1" : "0"}" class="text-xs bg-amber-600 text-white px-2 py-1 rounded">${item.published ? "轉為草稿" : "立即發布"}</button>
+                        <button data-action="delete-announcement" data-id="${escapeHTML(id)}" class="text-xs bg-red-600 text-white px-2 py-1 rounded">刪除</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toDatetimeLocalValue(rawDate) {
+            if (!rawDate) return "";
+            const dateObj = rawDate?.toDate instanceof Function ? rawDate.toDate() : rawDate;
+            if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return "";
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${dateObj.getFullYear()}-${pad(dateObj.getMonth() + 1)}-${pad(dateObj.getDate())}T${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`;
+        }
+
+        function buildPublishAtValue(inputValue) {
+            if (!inputValue) return new Date();
+            const parsed = new Date(inputValue);
+            return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+        }
+
+        function resetAnnouncementForm() {
+            if (!announcementForm) return;
+            announcementForm.reset();
+            const publishedEl = document.getElementById("announcement-published");
+            const pinnedEl = document.getElementById("announcement-pinned");
+            if (publishedEl) publishedEl.checked = true;
+            if (pinnedEl) pinnedEl.checked = false;
+            editingAnnouncementId = null;
+            if (announcementSubmitBtn) announcementSubmitBtn.textContent = "儲存公告";
+            if (announcementCancelEditBtn) announcementCancelEditBtn.classList.add("hidden");
+        }
+
+        function startEditAnnouncement(announcementId) {
+            const item = announcementMap.get(announcementId);
+            if (!item) return;
+            editingAnnouncementId = announcementId;
+            document.getElementById("announcement-title").value = item.title || "";
+            document.getElementById("announcement-author").value = item.author || "";
+            document.getElementById("announcement-category").value = item.category || "general";
+            document.getElementById("announcement-content").value = item.content || "";
+            document.getElementById("announcement-published").checked = Boolean(item.published);
+            document.getElementById("announcement-pinned").checked = Boolean(item.pinned);
+            document.getElementById("announcement-date").value = toDatetimeLocalValue(item.publishAt || item.createdAt || item.updatedAt || null);
+            if (announcementSubmitBtn) announcementSubmitBtn.textContent = "更新公告";
+            if (announcementCancelEditBtn) announcementCancelEditBtn.classList.remove("hidden");
+            announcementForm?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        async function loadStudents() {
+            studentsStatusEl.className = "text-sm text-gray-600 mb-2";
+            studentsStatusEl.textContent = "載入中...";
+            try {
+                const students = await request("/admin/students");
+                studentsStatusEl.className = "text-sm text-green-600 mb-2";
+                studentsStatusEl.textContent = `成功，共 ${students.length} 筆`;
+                studentsListEl.innerHTML = students.length
+                    ? students.map(studentCard).join("")
+                    : '<p class="text-sm text-gray-500">目前沒有學生資料。</p>';
+            } catch (error) {
+                studentsStatusEl.className = "text-sm text-red-600 mb-2";
+                studentsStatusEl.textContent = `失敗：${error.message}`;
+                studentsListEl.innerHTML = "";
+            }
+        }
+
+        async function loadPhotos() {
+            photosStatusEl.className = "text-sm text-gray-600 mb-2";
+            photosStatusEl.textContent = "載入中...";
+            try {
+                const photos = await requestPhotos("/admin/photos");
+                photosStatusEl.className = "text-sm text-green-600 mb-2";
+                photosStatusEl.textContent = `成功，共 ${photos.length} 筆`;
+                photosListEl.innerHTML = photos.length
+                    ? photos.map(photoCard).join("")
+                    : '<p class="text-sm text-gray-500">目前沒有相片。</p>';
+            } catch (error) {
+                photosStatusEl.className = "text-sm text-red-600 mb-2";
+                photosStatusEl.textContent = `失敗：${error.message}`;
+                photosListEl.innerHTML = "";
+            }
+        }
+
+        function startAnnouncementsListener() {
+            if (!announcementsStatusEl || !announcementsListEl) return;
+            if (unsubscribeAnnouncements) unsubscribeAnnouncements();
+
+            announcementsStatusEl.className = "text-sm text-gray-600 mb-2";
+            announcementsStatusEl.textContent = "實時同步中...";
+
+            const announcementsQuery = query(
+                collection(db, "announcements"),
+                orderBy("pinned", "desc"),
+                orderBy("publishAt", "desc")
+            );
+
+            unsubscribeAnnouncements = onSnapshot(
+                announcementsQuery,
+                (snapshot) => {
+                    const items = snapshot.docs.map((announcementDoc) => ({
+                        id: announcementDoc.id,
+                        ...announcementDoc.data()
+                    }));
+                    announcementMap.clear();
+                    items.forEach((item) => {
+                        announcementMap.set(item.id, item);
+                    });
+                    announcementsStatusEl.className = "text-sm text-green-600 mb-2";
+                    announcementsStatusEl.textContent = `同步成功，共 ${items.length} 筆`;
+                    announcementsListEl.innerHTML = items.length
+                        ? items.map(announcementCard).join("")
+                        : '<p class="text-sm text-gray-500">目前沒有公告。</p>';
+                },
+                (error) => {
+                    announcementsStatusEl.className = "text-sm text-red-600 mb-2";
+                    announcementsStatusEl.textContent = `同步失敗：${error.message}`;
+                    announcementsListEl.innerHTML = "";
+                }
+            );
+        }
+
+        async function initAdmin() {
+            try {
+                const { user, isAdmin } = await window.authReady;
+                currentUserEl.textContent = user?.email || "未登入";
+                adminStateEl.textContent = isAdmin ? "是" : "否";
+
+                if (!(user && isAdmin)) {
+                    window.location.href = user ? "index.html" : "login.html";
+                    return;
+                }
+
+                document.getElementById("loading-screen").style.display = "none";
+                document.body.classList.add("is-ready");
+                if (API_ENABLED) {
+                    await loadStudents();
+                } else {
+                    studentsStatusEl.className = "text-sm text-gray-500 mb-2";
+                    studentsStatusEl.textContent = "純 Firebase 模式：學生帳戶管理停用（需 Cloud Functions/Admin SDK）。";
+                    studentsListEl.innerHTML = '<p class="text-sm text-gray-500">此模組已停用。</p>';
+                    studentForm.querySelectorAll("input, button").forEach((el) => {
+                        el.disabled = true;
+                    });
+                    reloadStudentsBtn.disabled = true;
+                }
+
+                if (PHOTOS_API_ENABLED) {
+                    await loadPhotos();
+                } else {
+                    photosStatusEl.className = "text-sm text-gray-500 mb-2";
+                    photosStatusEl.textContent = "未設定 Photos API，iDrive E2 相簿管理停用。";
+                    photosListEl.innerHTML = '<p class="text-sm text-gray-500">此模組已停用。</p>';
+                    photoForm.querySelectorAll("input, button").forEach((el) => {
+                        el.disabled = true;
+                    });
+                    reloadPhotosBtn.disabled = true;
+                }
+                startAnnouncementsListener();
+            } catch (error) {
+                showError(`初始化失敗：${error.message}`);
+                document.getElementById("loading-screen").style.display = "none";
+                document.body.classList.add("is-ready");
+            }
+        }
+
+        studentForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                const payload = {
+                    email: document.getElementById("student-email").value.trim(),
+                    password: document.getElementById("student-password").value.trim(),
+                    name: document.getElementById("student-name").value.trim(),
+                    className: document.getElementById("student-class").value.trim(),
+                    role: "student"
+                };
+                await request("/admin/students", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                showSuccess("學生帳戶建立成功");
+                studentForm.reset();
+                document.getElementById("student-class").value = "3D";
+                await loadStudents();
+            } catch (error) {
+                showError(`建立學生失敗：${error.message}`);
+            }
+        });
+
+        photoForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                const input = document.getElementById("photo-file");
+                if (!input.files?.length) return;
+                const formData = new FormData();
+                formData.append("file", input.files[0]);
+                await requestPhotos("/admin/photos/upload", { method: "POST", body: formData });
+                showSuccess("相片上傳成功");
+                photoForm.reset();
+                await loadPhotos();
+            } catch (error) {
+                showError(`上傳相片失敗：${error.message}`);
+            }
+        });
+
+        function bindAnnouncementFormSubmit() {
+            if (!announcementForm) return;
+            announcementForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                try {
+                    const title = document.getElementById("announcement-title").value.trim();
+                    const content = document.getElementById("announcement-content").value.trim();
+                    const author = document.getElementById("announcement-author").value.trim() || "管理員";
+                    const category = document.getElementById("announcement-category").value;
+                    const published = document.getElementById("announcement-published").checked;
+
+                    if (!title || !content) {
+                        throw new Error("標題與內容為必填");
+                    }
+
+                    const manualDateInput = document.getElementById("announcement-date").value;
+                    const publishAt = buildPublishAtValue(manualDateInput);
+                    const pinned = document.getElementById("announcement-pinned").checked;
+
+                    if (editingAnnouncementId) {
+                        await updateDoc(doc(db, "announcements", editingAnnouncementId), {
+                            title,
+                            content,
+                            author,
+                            category,
+                            published,
+                            pinned,
+                            publishAt,
+                            updatedAt: serverTimestamp()
+                        });
+                        showSuccess(`公告已更新（${published ? "已發布" : "草稿"}）`);
+                    } else {
+                        await addDoc(collection(db, "announcements"), {
+                            title,
+                            content,
+                            author,
+                            category,
+                            published,
+                            pinned,
+                            publishAt,
+                            createdAt: serverTimestamp(),
+                            updatedAt: serverTimestamp()
+                        });
+                        showSuccess(`公告已${published ? "發布" : "儲存為草稿"}`);
+                    }
+                    resetAnnouncementForm();
+                } catch (error) {
+                    showError(`公告儲存失敗：${error.message}`);
+                }
+            });
+        }
+
+        studentsListEl.addEventListener("click", async (e) => {
+            const btn = e.target.closest("button");
+            if (!btn) return;
+            const action = btn.dataset.action;
+            const uid = btn.dataset.uid;
+            if (!uid) return;
+            try {
+                if (action === "reset-password") {
+                    const password = prompt("輸入新密碼（至少6位）");
+                    if (!password) return;
+                    await request(`/admin/students/${encodeURIComponent(uid)}/reset-password`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ password })
+                    });
+                    showSuccess("密碼重設成功");
+                }
+                if (action === "delete-student") {
+                    if (!confirm(`確定刪除學生 ${uid}？`)) return;
+                    await request(`/admin/students/${encodeURIComponent(uid)}`, { method: "DELETE" });
+                    showSuccess("學生刪除成功");
+                    await loadStudents();
+                }
+            } catch (error) {
+                showError(`學生管理操作失敗：${error.message}`);
+            }
+        });
+
+        photosListEl.addEventListener("click", async (e) => {
+            const btn = e.target.closest("button");
+            if (!btn || btn.dataset.action !== "delete-photo") return;
+            const key = decodeURIComponent(btn.dataset.key || "");
+            if (!key) return;
+            try {
+                if (!confirm(`確定刪除相片 ${key}？`)) return;
+                await requestPhotos(`/admin/photos/${encodeURIComponent(key)}`, { method: "DELETE" });
+                showSuccess("相片刪除成功");
+                await loadPhotos();
+            } catch (error) {
+                showError(`刪除相片失敗：${error.message}`);
+            }
+        });
+
+        document.addEventListener("click", async (e) => {
+            const btn = e.target.closest("button");
+            try {
+                if (!btn) return;
+                const action = btn.dataset.action;
+                const announcementId = btn.dataset.id || "";
+                if (!announcementId) return;
+
+                if (action === "edit-announcement") {
+                    startEditAnnouncement(announcementId);
+                    return;
+                }
+
+                if (action === "toggle-pin-announcement") {
+                    const currentPinned = btn.dataset.pinned === "1";
+                    await updateDoc(doc(db, "announcements", announcementId), {
+                        pinned: !currentPinned,
+                        updatedAt: serverTimestamp()
+                    });
+                    showSuccess(!currentPinned ? "公告已設為置頂" : "公告已取消置頂");
+                    return;
+                }
+
+                if (action === "toggle-publish-announcement") {
+                    const currentPublished = btn.dataset.published === "1";
+                    const payload = {
+                        published: !currentPublished,
+                        updatedAt: serverTimestamp()
+                    };
+                    if (!currentPublished) {
+                        const currentItem = announcementMap.get(announcementId);
+                        const hasPublishAt = Boolean(currentItem?.publishAt);
+                        if (!hasPublishAt) {
+                            payload.publishAt = new Date();
+                        }
+                    }
+                    await updateDoc(doc(db, "announcements", announcementId), payload);
+                    showSuccess(!currentPublished ? "公告已發布" : "公告已轉為草稿");
+                    return;
+                }
+
+                if (action === "delete-announcement") {
+                    if (!confirm("確定刪除此公告？")) return;
+                    await deleteDoc(doc(db, "announcements", announcementId));
+                    showSuccess("公告已刪除");
+                }
+            } catch (error) {
+                showError(`公告操作失敗：${error.message}`);
+            }
+        });
+
+        reloadStudentsBtn.addEventListener("click", loadStudents);
+        reloadPhotosBtn.addEventListener("click", loadPhotos);
+        const adminMain = document.querySelector("main");
+        adminMain.insertAdjacentHTML("beforeend", `
+            <section class="bg-white border rounded p-4 space-y-4">
+                <h3 class="font-semibold text-lg">公告管理（Firestore）</h3>
+                <form id="announcement-form" class="grid md:grid-cols-2 gap-3">
+                    <input id="announcement-title" type="text" placeholder="公告標題" class="border rounded px-3 py-2 md:col-span-2" required>
+                    <input id="announcement-author" type="text" placeholder="作者（例如：班主任）" class="border rounded px-3 py-2">
+                    <select id="announcement-category" class="border rounded px-3 py-2">
+                        <option value="general">一般公告</option>
+                        <option value="activity">活動通知</option>
+                        <option value="exam">考試資訊</option>
+                        <option value="reminder">重要提醒</option>
+                    </select>
+                    <input id="announcement-date" type="datetime-local" class="border rounded px-3 py-2">
+                    <label class="flex items-center gap-2 border rounded px-3 py-2">
+                        <input id="announcement-published" type="checkbox" checked>
+                        <span>立即發布（取消勾選即儲存草稿）</span>
+                    </label>
+                    <label class="flex items-center gap-2 border rounded px-3 py-2">
+                        <input id="announcement-pinned" type="checkbox">
+                        <span>置頂公告（首頁優先顯示）</span>
+                    </label>
+                    <textarea id="announcement-content" placeholder="公告內容" class="border rounded px-3 py-2 md:col-span-2 min-h-[120px]" required></textarea>
+                    <div class="md:col-span-2 flex gap-2">
+                        <button id="announcement-submit-btn" type="submit" class="bg-blue-600 text-white rounded px-3 py-2 hover:bg-blue-700">儲存公告</button>
+                        <button id="announcement-cancel-edit-btn" type="button" class="hidden bg-gray-600 text-white rounded px-3 py-2 hover:bg-gray-700">取消編輯</button>
+                    </div>
+                </form>
+                <div>
+                    <p id="announcements-status" class="text-sm text-gray-600 mb-2">待載入...</p>
+                    <div id="announcements-list" class="space-y-2 max-h-[500px] overflow-auto"></div>
+                </div>
+            </section>
+        `);
+        announcementForm = document.getElementById("announcement-form");
+        announcementSubmitBtn = document.getElementById("announcement-submit-btn");
+        announcementCancelEditBtn = document.getElementById("announcement-cancel-edit-btn");
+        announcementsStatusEl = document.getElementById("announcements-status");
+        announcementsListEl = document.getElementById("announcements-list");
+        bindAnnouncementFormSubmit();
+        announcementCancelEditBtn?.addEventListener("click", resetAnnouncementForm);
+        resetAnnouncementForm();
+        window.addEventListener("DOMContentLoaded", initAdmin);
+        window.addEventListener("beforeunload", () => {
+            if (unsubscribeAnnouncements) unsubscribeAnnouncements();
+        });
+    </script>
+</body>
+</html>

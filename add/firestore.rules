@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in [
+          "admin@kywc.edu.hk",
+          "admin@gmail.com"
+        ];
+    }
+
+    function isValidAnnouncementCreate() {
+      return request.resource.data.keys().hasAll(["title", "content", "author", "category", "published", "pinned", "publishAt", "createdAt", "updatedAt"])
+        && request.resource.data.title is string
+        && request.resource.data.content is string
+        && request.resource.data.author is string
+        && request.resource.data.category is string
+        && request.resource.data.published is bool
+        && request.resource.data.pinned is bool
+        && request.resource.data.publishAt is timestamp;
+    }
+
+    function isValidAnnouncementUpdate() {
+      return request.resource.data.keys().hasAll(["title", "content", "author", "category", "published", "pinned", "publishAt", "updatedAt"])
+        && request.resource.data.title is string
+        && request.resource.data.content is string
+        && request.resource.data.author is string
+        && request.resource.data.category is string
+        && request.resource.data.published is bool
+        && request.resource.data.pinned is bool
+        && request.resource.data.publishAt is timestamp;
+    }
+
+    match /announcements/{docId} {
+      // 管理员可读全部；其他人只可读已发布
+      allow read: if isAdmin() || resource.data.published == true;
+
+      // 只有管理员可写
+      allow create: if isAdmin() && isValidAnnouncementCreate();
+      allow update: if isAdmin() && isValidAnnouncementUpdate();
+      allow delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

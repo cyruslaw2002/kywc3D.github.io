@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 - KYWC 3D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" href="https://www.twghkywc.edu.hk/sites/default/files/sch_logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; background: #f3f4f6; }
+        .login-card { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-2xl login-card w-full max-w-md border-t-8 border-red-700">
+        <div class="text-center mb-8">
+            <img src="https://www.twghkywc.edu.hk/sites/default/files/sch_logo.png" class="mx-auto h-16 mb-4">
+            <h1 class="text-2xl font-bold text-gray-800">班網系統登入</h1>
+        </div>
+        <form id="loginForm" class="space-y-4">
+            <input id="email" type="email" placeholder="電子郵件" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none" required>
+            <input id="password" type="password" placeholder="密碼" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none" required>
+            <div id="errorMsg" class="hidden text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-100"></div>
+            <button type="submit" id="submitBtn" class="w-full py-3 bg-slate-800 text-white rounded-lg font-bold hover:bg-slate-700 transition-all">登入</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { auth } from "./firebase-config.js";
+
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("submitBtn");
+            const err = document.getElementById("errorMsg");
+            const emailInput = document.getElementById("email");
+            const passwordInput = document.getElementById("password");
+            
+            btn.disabled = true;
+            btn.textContent = "驗證中...";
+            err.classList.add("hidden");
+
+            try {
+                // 驗證輸入
+                if (!emailInput.value.trim() || !passwordInput.value.trim()) {
+                    throw new Error("EMAIL_EMPTY");
+                }
+                
+                console.log("[Login] 嘗試登入:", emailInput.value.trim());
+                const result = await signInWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
+                console.log("[Login] 登入成功:", result.user.email);
+                
+                // 稍微延遲，確保 Firebase 有時間同步
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                console.log("[Login] 重定向到首頁");
+                window.location.href = "index.html";
+            } catch (error) {
+                let errorText = "登入失敗，請檢查帳號和密碼";
+                
+                if (error.code === "auth/user-not-found") {
+                    errorText = "帳號不存在";
+                } else if (error.code === "auth/wrong-password") {
+                    errorText = "密碼錯誤";
+                } else if (error.code === "auth/invalid-email") {
+                    errorText = "電子郵件格式無效";
+                } else if (error.code === "auth/user-disabled") {
+                    errorText = "此帳號已被停用";
+                } else if (error.code === "auth/too-many-requests") {
+                    errorText = "登入嘗試過多，請稍後再試";
+                } else if (error.message === "EMAIL_EMPTY") {
+                    errorText = "請輸入電子郵件和密碼";
+                }
+                
+                console.error("[Login] 登入失敗:", errorText, error);
+                err.textContent = errorText;
+                err.classList.remove("hidden");
+                btn.disabled = false;
+                btn.textContent = "登入";
+            }
+        });
+    </script>
+</body>
+</html>

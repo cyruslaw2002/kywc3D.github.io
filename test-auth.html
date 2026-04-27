@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>認證診斷工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Courier New', monospace; }
+        .log-box { max-height: 400px; overflow-y: auto; background: #1e1e1e; color: #00ff00; padding: 1rem; border-radius: 0.5rem; }
+        .log-line { margin: 0.25rem 0; }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .info { color: #74c0fc; }
+        .warn { color: #ffd43b; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto space-y-6">
+        <h1 class="text-3xl font-bold">🔐 認證診斷工具</h1>
+        
+        <div class="bg-gray-800 p-6 rounded-lg space-y-4">
+            <div>
+                <label class="block text-sm font-semibold mb-2">電子郵件</label>
+                <input id="testEmail" type="email" placeholder="test@example.com" class="w-full px-4 py-2 bg-gray-700 rounded text-white">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold mb-2">密碼</label>
+                <input id="testPassword" type="password" placeholder="password" class="w-full px-4 py-2 bg-gray-700 rounded text-white">
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="testLogin()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold">登入測試</button>
+                <button onclick="testLogout()" class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded font-semibold">登出測試</button>
+                <button onclick="clearLogs()" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded font-semibold">清除日誌</button>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 p-6 rounded-lg space-y-4">
+            <h2 class="text-xl font-semibold">系統狀態</h2>
+            <div class="space-y-2">
+                <div><span class="text-gray-400">當前用戶：</span><span id="currentUser">檢查中...</span></div>
+                <div><span class="text-gray-400">是否管理員：</span><span id="isAdminStatus">檢查中...</span></div>
+                <div><span class="text-gray-400">認證初始化：</span><span id="authInitStatus">檢查中...</span></div>
+                <div><span class="text-gray-400">當前 URL：</span><span id="currentUrl" class="break-all text-sm"></span></div>
+                <div><span class="text-gray-400">登入頁判定：</span><span id="isLoginPageStatus">檢查中...</span></div>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4">控制台日誌</h2>
+            <div id="logBox" class="log-box"></div>
+        </div>
+        
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4">快速連結</h2>
+            <div class="flex gap-2">
+                <a href="index.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">首頁</a>
+                <a href="login.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">登入頁</a>
+                <a href="gallery.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">相簿</a>
+                <button onclick="openDevTools()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded">開啟開發工具</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { auth } from "./firebase-config.js";
+
+        let logHistory = [];
+
+        function addLog(message, type = "info") {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = { timestamp, message, type };
+            logHistory.push(logEntry);
+            
+            const logBox = document.getElementById("logBox");
+            const logLine = document.createElement("div");
+            logLine.className = `log-line ${type}`;
+            logLine.textContent = `[${timestamp}] ${message}`;
+            logBox.appendChild(logLine);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function clearLogs() {
+            logHistory = [];
+            document.getElementById("logBox").innerHTML = "";
+            addLog("日誌已清除", "info");
+        }
+
+        function updateStatus() {
+            document.getElementById("currentUser").textContent = window.currentUser?.email || "未認證";
+            document.getElementById("isAdminStatus").textContent = window.isAdmin ? "是 (管理員)" : "否 (學生)";
+            document.getElementById("authInitStatus").textContent = window.authInitialized ? "已完成" : "進行中";
+            document.getElementById("currentUrl").textContent = window.location.href;
+            
+            // 調用 isLoginPageCheck (需要存取 auth.js 中的函數)
+            const filename = window.location.pathname.split("/").pop().toLowerCase();
+            const isLoginPage = filename.includes("login");
+            document.getElementById("isLoginPageStatus").textContent = isLoginPage ? "是" : "否";
+        }
+
+        window.testLogin = async () => {
+            const email = document.getElementById("testEmail").value;
+            const password = document.getElementById("testPassword").value;
+            
+            if (!email || !password) {
+                addLog("請填入電子郵件和密碼", "error");
+                return;
+            }
+            
+            try {
+                addLog(`嘗試登入: ${email}`, "info");
+                const result = await signInWithEmailAndPassword(auth, email, password);
+                addLog(`✓ 登入成功: ${result.user.email}`, "success");
+                
+                // 等待 auth.js 更新狀態
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                updateStatus();
+                
+            } catch (error) {
+                addLog(`✗ 登入失敗: ${error.code} - ${error.message}`, "error");
+            }
+        };
+
+        window.testLogout = async () => {
+            try {
+                addLog("嘗試登出...", "info");
+                await signOut(auth);
+                addLog("✓ 登出成功", "success");
+                
+                // 等待 auth.js 更新狀態
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                updateStatus();
+                
+            } catch (error) {
+                addLog(`✗ 登出失敗: ${error.message}`, "error");
+            }
+        };
+
+        window.clearLogs = clearLogs;
+        
+        window.openDevTools = () => {
+            addLog("請按 F12 開啟開發者工具並查看控制台", "info");
+        };
+
+        // 監聽 auth.js 的認證狀態
+        const originalLog = console.log;
+        console.log = (...args) => {
+            originalLog(...args);
+            const message = args.map(a => 
+                typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
+            ).join(" ");
+            if (message.includes("[Auth]") || message.includes("[Login]") || message.includes("[Index]") || message.includes("[Gallery]")) {
+                if (message.includes("錯誤") || message.includes("失敗")) {
+                    addLog(message, "error");
+                } else if (message.includes("✓") || message.includes("成功")) {
+                    addLog(message, "success");
+                } else {
+                    addLog(message, "info");
+                }
+            }
+        };
+
+        // 初始化
+        await window.authReady;
+        addLog("✓ auth.js 已初始化完成", "success");
+        updateStatus();
+
+        // 定期更新狀態
+        setInterval(updateStatus, 2000);
+    </script>
+</body>
+</html>

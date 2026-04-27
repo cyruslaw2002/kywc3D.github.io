@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="shortcut icon" href="https://www.twghkywc.edu.hk/sites/default/files/sch_logo.png" type="image/png">
+    <title>班級相簿 - KYWC 3D班網</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1A365D',
+                        secondary: '#2C5282',
+                        accent: '#D73F09',
+                        neutral: '#F8F9FA',
+                        dark: '#2D3748',
+                        grayHK: '#E2E8F0',
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .card-shadow { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+            .hk-hover { transition: all 150ms ease-in-out; }
+            .section-padding { padding-top: 3rem; padding-bottom: 3rem; }
+            .section-divider { width: 4rem; height: 0.2rem; margin: 1rem auto 2rem; }
+            .filter-btn.active { @apply bg-primary text-white; }
+        }
+    </style>
+    <!-- 統一認證管理 -->
+    <script type="module" src="./auth.js"></script>
+</head>
+
+<body class="font-sans text-dark bg-white">
+    <header class="bg-white border-b border-grayHK sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="logo">
+                <a href="index.html" class="flex items-center space-x-2">
+                    <img src="https://www.twghkywc.edu.hk/sites/default/files/sch_logo.png" alt="KYWC" class="w-8 h-8">
+                    <span class="text-lg font-bold text-primary">KYWC 3D班網</span>
+                </a>
+            </div>
+            <nav class="hidden md:flex items-center space-x-1">
+                <a href="index.html" class="px-4 py-2 hover:text-primary hk-hover">首頁</a>
+                <a href="index.html#announcements" class="px-4 py-2 hover:text-primary hk-hover">最新公告</a>
+                <a href="gallery.html" class="px-4 py-2 text-primary font-bold">班級相冊</a>
+                <a href="resources.html" class="px-4 py-2 hover:text-primary hk-hover">學習資源</a>
+                <a href="index.html#contact" class="px-4 py-2 hover:text-primary hk-hover">聯絡我們</a>
+            </nav>
+            <button id="menu-toggle" class="md:hidden p-2"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <section class="bg-neutral section-padding border-b border-grayHK">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-3xl font-bold text-primary">班級相簿</h1>
+            <div class="section-divider bg-primary"></div>
+            <p class="text-gray-600 max-w-2xl mx-auto">這裡記錄了我們 3D 班在東華三院郭一葦中學的點點滴滴，每一個瞬間都是珍貴的回憶。</p>
+        </div>
+    </section>
+
+    <section class="section-padding">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap justify-center gap-2 mb-10">
+                <button class="filter-btn active px-5 py-2 rounded-full border border-grayHK text-sm hk-hover hover:border-primary" data-filter="all">全部照片</button>
+                <button class="filter-btn px-5 py-2 rounded-full border border-grayHK text-sm hk-hover hover:border-primary" data-filter="class">班級活動</button>
+                <button class="filter-btn px-5 py-2 rounded-full border border-grayHK text-sm hk-hover hover:border-primary" data-filter="school">學校盛事</button>
+                <button class="filter-btn px-5 py-2 rounded-full border border-grayHK text-sm hk-hover hover:border-primary" data-filter="trip">校外參觀</button>
+            </div>
+
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="animate-pulse bg-gray-100 h-80 rounded-lg"></div>
+                <div class="animate-pulse bg-gray-100 h-80 rounded-lg"></div>
+                <div class="animate-pulse bg-gray-100 h-80 rounded-lg"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white py-8 border-t border-gray-700">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex justify-center items-center space-x-2 mb-4">
+                <img src="https://www.twghkywc.edu.hk/sites/default/files/sch_logo.png" alt="Logo" class="w-6 h-6 brightness-0 invert">
+                <span class="font-bold">KYWC 3D 班網</span>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">團結互助，共創輝煌</p>
+            <div class="flex justify-center space-x-4 mb-6">
+                <a href="#" class="hover:text-accent"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-accent"><i class="fab fa-facebook"></i></a>
+            </div>
+            <p class="text-gray-500 text-xs">&copy; 2025 KYWC_3D班網. 保留所有權利。</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { PHOTOS_API_BASE, PHOTOS_API_ENABLED } from "./firebase-config.js";
+        // 等待認證系統初始化完成，使用 auth.js 中的全局變量
+        const authResult = await window.authReady;
+        
+        console.log("[Gallery] authReady 已解決:", { 
+            user: authResult.user?.email || "null",
+            authInitialized: window.authInitialized
+        });
+
+        function inferCategoryFromUrl(url) {
+            const filename = url.split("/").pop()?.toLowerCase() || "";
+            if (filename.includes("class")) return "class";
+            if (filename.includes("school")) return "school";
+            if (filename.includes("trip")) return "trip";
+            return "all";
+        }
+
+        function formatCategoryLabel(category) {
+            if (category === "class") return "班級活動";
+            if (category === "school") return "學校盛事";
+            if (category === "trip") return "校外參觀";
+            return "班級相簿";
+        }
+
+        function escapeAttr(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        function applyFilter(filter) {
+            const galleryItems = document.querySelectorAll(".gallery-item");
+            galleryItems.forEach((item) => {
+                if (filter === "all" || item.getAttribute("data-category") === filter) {
+                    item.style.display = "block";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+        }
+
+        async function loadGalleryPhotos() {
+            const grid = document.getElementById("gallery-grid");
+            if (!PHOTOS_API_ENABLED) {
+                grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">未設定照片 API，暫時無法載入 iDrive E2 相片。</p>';
+                return;
+            }
+            try {
+                const res = await fetch(`${PHOTOS_API_BASE}/photos`);
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+
+                const urls = await res.json();
+                if (!Array.isArray(urls) || urls.length === 0) {
+                    grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">暫時未有相片。</p>';
+                    return;
+                }
+
+                const latestFirst = [...urls].reverse();
+                grid.innerHTML = latestFirst.map((url, idx) => {
+                    const safeUrl = escapeAttr(url);
+                    const category = inferCategoryFromUrl(url);
+                    const title = `相片 ${latestFirst.length - idx}`;
+                    const categoryLabel = formatCategoryLabel(category);
+                    return `
+                        <div class="gallery-item ${category} group cursor-pointer" data-category="${category}">
+                            <div class="relative overflow-hidden rounded-lg card-shadow">
+                                <img src="${safeUrl}" alt="${title}" class="w-full h-64 object-cover transform transition-transform duration-500 group-hover:scale-110" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.classList.add('opacity-100');">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <i class="fas fa-search-plus text-white text-3xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <span class="text-xs font-bold text-accent uppercase">${categoryLabel}</span>
+                                <h3 class="text-lg font-semibold text-primary">${title}</h3>
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+            } catch (error) {
+                console.error("載入相簿失敗:", error);
+                grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">相簿載入失敗，請稍後再試。</p>';
+            }
+        }
+
+        // 使用 auth.js 提供的全局變量來判斷認證狀態
+        if (window.currentUser) {
+            loadGalleryPhotos();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // 篩選功能邏輯
+            const filterBtns = document.querySelectorAll(".filter-btn");
+            filterBtns.forEach((btn) => {
+                btn.addEventListener("click", function () {
+                    filterBtns.forEach((b) => b.classList.remove("active", "bg-primary", "text-white"));
+                    this.classList.add("active", "bg-primary", "text-white");
+                    applyFilter(this.getAttribute("data-filter"));
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.env
+*firebase-adminsdk*.json
+serviceAccountKey.json
+__pycache__/
+*.pyc
+.venv/
+firebase-debug.log
+add/firebase-debug.log
