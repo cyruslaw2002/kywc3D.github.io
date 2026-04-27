@@ -12,14 +12,14 @@ export const firebaseConfig = {
     measurementId: "G-ZT77DVXW79"
 };
 
-export const DEFAULT_API_BASE = "";
+export const DEFAULT_API_BASE = "https://kywc3d.qzz.io/api";
 const savedApiBase = (localStorage.getItem("apiBase") || "").replace(/\/+$/, "");
 const legacyApiBase = "http://127.0.0.1:8000/api";
 export const API_BASE = savedApiBase && savedApiBase !== legacyApiBase ? savedApiBase : DEFAULT_API_BASE;
 export const API_ENABLED = API_BASE.length > 0;
 
 const savedPhotosApiBase = (localStorage.getItem("photosApiBase") || "").replace(/\/+$/, "");
-export const DEFAULT_PHOTOS_API_BASE = "/api";
+export const DEFAULT_PHOTOS_API_BASE = "https://kywc3d.qzz.io/api";
 export const PHOTOS_API_BASE = savedPhotosApiBase || API_BASE || DEFAULT_PHOTOS_API_BASE;
 export const PHOTOS_API_ENABLED = PHOTOS_API_BASE.length > 0;
 
