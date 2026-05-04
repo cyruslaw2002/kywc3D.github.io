@@ -786,7 +786,7 @@
                                     </div>
                                     <div>
                                         <h4 class="font-semibold mb-1">學校地址</h4>
-                                        <p class="text-gray-600">香港九龍灣宏照道38號</p>
+                                        <p class="text-gray-600">£</p>
                                     </div>
                                 </div>
                                 
@@ -795,8 +795,8 @@
                                         <i class="fa fa-phone text-primary"></i>
                                     </div>
                                     <div>
-                                        <h4 class="font-semibold mb-1">聯絡電話（港式格式）</h4>
-                                        <p class="text-gray-600">2345 6789（港式：去除連字符，用空格分隔）</p>
+                                        <h4 class="font-semibold mb-1">聯絡電話</h4>
+                                        <p class="text-gray-600">£</p>
                                     </div>
                                 </div>
                                 
@@ -806,7 +806,7 @@
                                     </div>
                                     <div>
                                         <h4 class="font-semibold mb-1">電子郵箱</h4>
-                                        <p class="text-gray-600">3d@kywc.edu.hk</p>
+                                        <p class="text-gray-600">£</p>
                                     </div>
                                 </div>
                                 
@@ -816,7 +816,7 @@
                                     </div>
                                     <div>
                                         <h4 class="font-semibold mb-1">上課時間</h4>
-                                        <p class="text-gray-600">星期一至星期五：上午8時至下午4時（港式：數字→中文時刻表述）</p>
+                                        <p class="text-gray-600">星期一至星期五：上午8時至下午4時</p>
                                     </div>
                                 </div>
                             </div>
@@ -824,15 +824,22 @@
                             <div class="mt-6"> <!-- 減少上邊距 -->
                                 <h4 class="font-semibold mb-3">關注我們</h4>
                                 <div class="flex space-x-3"> <!-- 減少圖標間距 -->
-                                    <a href="#" class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hk-hover hover:bg-secondary">
-                                        <i class="fa fa-facebook"></i>
                                     </a>
-                                    <a href="#" class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hk-hover hover:bg-secondary">
+                                    <a href="https://www.instagram.com/kywc_3d/" class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hk-hover hover:bg-secondary">
                                         <i class="fa fa-instagram"></i>
                                     </a>
-                                    <a href="#" class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hk-hover hover:bg-secondary">
-                                        <i class="fa fa-wechat"></i>
+                                    <a href="#wechat-modal" class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hk-hover hover:bg-secondary">
+                                        <i class="fa fa-weixin"></i>
                                     </a>
+                                    
+                                    <!-- 彈出的 QR Code 遮照層 -->
+                                    <div id="wechat-modal" class="wechat-popup">
+                                        <a href="#" class="wechat-close-area"></a> <!-- 點擊空白處關閉 -->
+                                        <div class="wechat-content">
+                                            <img src="你的QR_CODE圖片網址.jpg" alt="WeChat QR Code">
+                                            <p>掃描 QR Code 加我微信</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
