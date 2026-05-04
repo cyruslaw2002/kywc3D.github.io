@@ -90,6 +90,47 @@
                 transition: color 150ms ease-in-out, background-color 150ms ease-in-out;
             }
         }
+                    /* 預設隱藏彈窗 */
+            .wechat-popup {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8); /* 半透明黑背景 */
+                z-index: 9999;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            /* 當 URL hash 匹配時顯示 (例如點擊 #wechat-modal) */
+            .wechat-popup:target {
+                display: flex;
+            }
+            
+            /* 內容樣式 */
+            .wechat-content {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                text-align: center;
+                position: relative;
+                max-width: 300px;
+            }
+            
+            .wechat-content img {
+                width: 200px;
+                height: 200px;
+            }
+            
+            /* 點擊背景區域關閉的透明層 */
+            .wechat-close-area {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                cursor: default;
+            }
     </style>
     <!-- 統一認證管理 -->
     <script type="module" src="./auth.js"></script>
