@@ -188,12 +188,11 @@ async def delete_photo_by_body(payload: dict = Body(...), admin=Depends(verify_a
         raise HTTPException(status_code=500, detail=f"刪除失敗: {str(e)}")
 
 
-const API_BASE_URL = "https://vercel.app";
+const API_BASE_URL = "https://kywc3-d-github-io.vercel.app"; 
 
 fetch(`${API_BASE_URL}/api/admin/students`, {
     method: "GET",
     headers: {
-        // 如果 verify_admin 有防護，記得帶上你的 Token 認證
         "Authorization": `Bearer ${localStorage.getItem('adminToken')}` 
     }
 })
