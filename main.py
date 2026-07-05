@@ -10,27 +10,49 @@ from typing import Optional
 from google.api_core.exceptions import NotFound
 from urllib.parse import urlparse, unquote
 
-load_dotenv()
+# 安全載入本地環境變數
+if os.path.exists(".env"):
+    load_dotenv()
 
 app = FastAPI(title="KYWC-3D API System")
 
-cors_origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",") if origin.strip()]
+# 🔒 啟用 CORS 跨來源資源共享白名單（精準匹配您的自訂網域）
+origins = [
+    "https://qzz.io",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ⚠️ Firebase 初始化（支援 Vercel 環境變數直接注入與 Private Key 換行修正）
 FIREBASE_KEY_PATH = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY", "serviceAccountKey.json")
 firebase_init_error = None
 
 if not firebase_admin._apps:
     try:
-        cred = credentials.Certificate(FIREBASE_KEY_PATH)
-        firebase_admin.initialize_app(cred)
-        print("Firebase Admin SDK initialized")
+        if os.path.exists(FIREBASE_KEY_PATH):
+            cred = credentials.Certificate(FIREBASE_KEY_PATH)
+            firebase_admin.initialize_app(cred)
+        elif os.getenv("FIREBASE_PRIVATE_KEY"):
+            # 雲端 Vercel 環境變數模式
+            private_key = os.getenv("FIREBASE_PRIVATE_KEY", "").replace('\\n', '\n')
+            firebase_config = {
+                "type": "service_account",
+                "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+                "private_key": private_key,
+                "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+                "token_uri": "https://googleapis.com"
+            }
+            cred = credentials.Certificate(firebase_config)
+            firebase_admin.initialize_app(cred)
+        print("Firebase Admin SDK initialized successfully")
     except Exception as e:
         firebase_init_error = str(e)
         print(f"Firebase init failed: {e}")
@@ -40,41 +62,34 @@ db = firestore.client() if firebase_admin._apps else None
 default_admin_emails = "admin@kywc.edu.hk,test1@gmail.com,admin@gmail.com"
 ADMIN_EMAILS = [email.strip() for email in os.getenv("ADMIN_EMAILS", default_admin_emails).split(",") if email.strip()]
 
+# ☁️ AWS / E2 S3 客戶端設定
 s3_client = boto3.client(
     "s3",
     endpoint_url=os.getenv("E2_ENDPOINT"),
     aws_access_key_id=os.getenv("E2_ACCESS_KEY"),
-    aws_secret_access_key=os.getenv("E2_SECRET_KEY"),
+    aws_secret_access_key=os.getenv("E2_SECRET_KEY")
 )
 BUCKET_NAME = os.getenv("E2_BUCKET_NAME")
 E2_ENDPOINT = os.getenv("E2_ENDPOINT", "").rstrip("/")
 
-
 def photo_public_url(key: str) -> str:
-    """
-    生成可直接访问的图片 URL。
-    对私有桶使用预签名 URL，避免前端拿到 200 但非图片内容。
-    """
     try:
         return s3_client.generate_presigned_url(
             "get_object",
             Params={"Bucket": BUCKET_NAME, "Key": key},
-            ExpiresIn=7 * 24 * 3600
+            ExpiresIn=24 * 3600
         )
     except Exception:
         if E2_ENDPOINT and BUCKET_NAME:
             return f"{E2_ENDPOINT}/{BUCKET_NAME}/{key}"
         return key
 
-
 def normalize_photo_key(photo_key_or_url: str) -> str:
     if not photo_key_or_url:
         return photo_key_or_url
-    # 允许传入预签名 URL 或普通 URL。
     if photo_key_or_url.startswith("http://") or photo_key_or_url.startswith("https://"):
         parsed = urlparse(photo_key_or_url)
         path = unquote(parsed.path or "")
-        # path style: /bucket/key
         bucket_prefix = f"/{BUCKET_NAME}/"
         if path.startswith(bucket_prefix):
             return path[len(bucket_prefix):]
@@ -85,34 +100,29 @@ def normalize_photo_key(photo_key_or_url: str) -> str:
             return photo_key_or_url[len(prefix):]
     return photo_key_or_url
 
-
 async def verify_admin(authorization: Optional[str] = Header(None)):
     if not firebase_admin._apps:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Firebase Admin 尚未初始化，請檢查 FIREBASE_SERVICE_ACCOUNT_KEY。錯誤: {firebase_init_error}"
-        )
+        raise HTTPException(status_code=503, detail=f"Firebase 未正確初始化: {firebase_init_error}")
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="未提供認證憑證")
-
     token = authorization.split(" ")[1]
     try:
         decoded_token = auth.verify_id_token(token)
         user_email = decoded_token.get("email")
         if user_email not in ADMIN_EMAILS:
-            raise HTTPException(status_code=403, detail="權限不足，僅限管理員")
+            raise HTTPException(status_code=403, detail="您沒有管理員權限")
         return decoded_token
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        raise he
     except Exception:
-        raise HTTPException(status_code=401, detail="無效的認證憑證")
+        raise HTTPException(status_code=401, detail="憑證驗證失敗")
 
-
+# 🛠️ 根目錄路由 (確認後端狀態用)
 @app.get("/")
 async def root():
-    return {"status": "online", "message": "KYWC-3D API running"}
+    return {"status": "online", "message": "KYWC-3D API running successfully on Vercel"}
 
-
+# 📸 照片 API 區塊
 @app.get("/api/admin/photos")
 async def list_photos_admin(admin=Depends(verify_admin)):
     try:
@@ -126,18 +136,13 @@ async def list_photos_admin(admin=Depends(verify_admin)):
                     "size": obj["Size"],
                     "last_modified": obj["LastModified"].isoformat()
                 })
-        photos.sort(key=lambda x: x["last_modified"], reverse=True)
+            photos.sort(key=lambda x: x["last_modified"], reverse=True)
         return photos
     except (BotoCoreError, ClientError) as e:
-        raise HTTPException(status_code=500, detail=f"讀取儲存空間失敗: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=f"獲取照片失敗: {str(e)}")
 
 @app.get("/api/photos")
 async def list_photos_public():
-    """
-    公開相簿列表：給前台 gallery/index 使用（不需要管理員權限）。
-    回傳格式維持舊版，只回傳 URL 陣列。
-    """
     try:
         response = s3_client.list_objects_v2(Bucket=BUCKET_NAME)
         urls = []
@@ -147,8 +152,7 @@ async def list_photos_public():
                 urls.append(photo_public_url(obj["Key"]))
         return urls
     except (BotoCoreError, ClientError) as e:
-        raise HTTPException(status_code=500, detail=f"讀取公開相簿失敗: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=f"獲取公開照片失敗: {str(e)}")
 
 @app.post("/api/admin/photos/upload")
 async def upload_photo(file: UploadFile = File(...), admin=Depends(verify_admin)):
@@ -164,7 +168,6 @@ async def upload_photo(file: UploadFile = File(...), admin=Depends(verify_admin)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"上傳失敗: {str(e)}")
 
-
 @app.delete("/api/admin/photos/{photo_key:path}")
 async def delete_photo(photo_key: str, admin=Depends(verify_admin)):
     try:
@@ -174,39 +177,27 @@ async def delete_photo(photo_key: str, admin=Depends(verify_admin)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"刪除失敗: {str(e)}")
 
-
-@app.delete("/api/admin/photos")
-async def delete_photo_by_body(payload: dict = Body(...), admin=Depends(verify_admin)):
-    photo_key_or_url = (payload or {}).get("photo")
-    if not photo_key_or_url:
-        raise HTTPException(status_code=400, detail="請提供 photo (key 或 URL)")
+# 🎓 學生管理 API 區塊
+@app.get("/api/admin/students")
+async def list_students_admin(admin=Depends(verify_admin)):
+    if db is None:
+        raise HTTPException(status_code=503, detail="Firestore 未初始化")
     try:
-        normalized_key = normalize_photo_key(photo_key_or_url)
-        s3_client.delete_object(Bucket=BUCKET_NAME, Key=normalized_key)
-        return {"message": f"已刪除 {normalized_key}"}
+        docs = db.collection("students").stream()
+        students = []
+        for doc_item in docs:
+            data = doc_item.to_dict() or {}
+            students.append({"id": doc_item.id, **data})
+        return students
+    except NotFound:
+        raise HTTPException(status_code=503, detail="Firestore 資料庫尚未建立")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"刪除失敗: {str(e)}")
-
-
-const API_BASE_URL = "https://kywc3-d-github-io.vercel.app"; 
-
-fetch(`${API_BASE_URL}/api/admin/students`, {
-    method: "GET",
-    headers: {
-        "Authorization": `Bearer ${localStorage.getItem('adminToken')}` 
-    }
-})
-.then(res => res.json())
-.then(data => console.log("成功從 Vercel 拿到學生資料！", data))
-.catch(err => console.error("連線失敗：", err));
-
-
+        raise HTTPException(status_code=500, detail=f"讀取學生資料失敗: {str(e)}")
 
 @app.post("/api/admin/students")
 async def create_student(payload: dict = Body(...), admin=Depends(verify_admin)):
     if db is None:
         raise HTTPException(status_code=503, detail="Firestore 未初始化")
-
     email = (payload.get("email") or "").strip()
     password = str(payload.get("password") or "")
     name = (payload.get("name") or "").strip()
@@ -217,7 +208,6 @@ async def create_student(payload: dict = Body(...), admin=Depends(verify_admin))
         raise HTTPException(status_code=400, detail="email 與 password 為必填")
     if len(password) < 6:
         raise HTTPException(status_code=400, detail="password 至少 6 位")
-
     try:
         user = auth.create_user(email=email, password=password, display_name=name or None)
         db.collection("students").document(user.uid).set({
@@ -235,12 +225,10 @@ async def create_student(payload: dict = Body(...), admin=Depends(verify_admin))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"建立學生帳戶失敗: {str(e)}")
 
-
 @app.put("/api/admin/students/{uid}")
 async def update_student(uid: str, payload: dict = Body(...), admin=Depends(verify_admin)):
     if db is None:
         raise HTTPException(status_code=503, detail="Firestore 未初始化")
-
     email = payload.get("email")
     name = payload.get("name")
     class_name = payload.get("className")
@@ -270,48 +258,4 @@ async def update_student(uid: str, payload: dict = Body(...), admin=Depends(veri
     try:
         if update_auth:
             auth.update_user(uid, **update_auth)
-        db.collection("students").document(uid).set(firestore_patch, merge=True)
-        return {"message": "學生資料更新成功", "uid": uid}
-    except auth.UserNotFoundError:
-        raise HTTPException(status_code=404, detail="找不到此學生帳戶")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"更新學生資料失敗: {str(e)}")
-
-
-@app.post("/api/admin/students/{uid}/reset-password")
-async def reset_student_password(uid: str, payload: dict = Body(...), admin=Depends(verify_admin)):
-    password = str((payload or {}).get("password") or "")
-    if len(password) < 6:
-        raise HTTPException(status_code=400, detail="password 至少 6 位")
-    try:
-        auth.update_user(uid, password=password)
-        db.collection("students").document(uid).set({
-            "updatedBy": admin.get("uid"),
-            "updatedAt": firestore.SERVER_TIMESTAMP
-        }, merge=True)
-        return {"message": "密碼重設成功", "uid": uid}
-    except auth.UserNotFoundError:
-        raise HTTPException(status_code=404, detail="找不到此學生帳戶")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"密碼重設失敗: {str(e)}")
-
-
-@app.delete("/api/admin/students/{uid}")
-async def delete_student(uid: str, admin=Depends(verify_admin)):
-    if db is None:
-        raise HTTPException(status_code=503, detail="Firestore 未初始化")
-    try:
-        db.collection("students").document(uid).delete()
-        auth.delete_user(uid)
-        return {"message": f"學生 {uid} 已刪除"}
-    except auth.UserNotFoundError:
-        db.collection("students").document(uid).delete()
-        return {"message": f"學生 {uid} 已刪除（Auth 帳戶不存在）"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"刪除學生失敗: {str(e)}")
-
-
-if __name__ == "__main__":
-    import uvicorn
-    api_port = int(os.getenv("API_PORT", "8001"))
-    uvicorn.run(app, host="0.0.0.0", port=api_port)
+Use code with caution.db.collection("students").document(uid).set(firestore_patch, merge=True)return {"message": "學生資料更新成功", "uid": uid}except auth.UserNotFoundError:raise HTTPException(status_code=404, detail="找不到此學生帳戶")except Exception as e:raise HTTPException(status_code=500, detail=f"更新學生資料失敗: {str(e)}")@app.delete("/api/admin/students/{uid}")async def delete_student(uid: str, admin=Depends(verify_admin)):if db is None:raise HTTPException(status_code=503, detail="Firestore 未初始化")try:db.collection("students").document(uid).delete()auth.delete_user(uid)return {"message": f"學生 {uid} 已刪除"}except auth.UserNotFoundError:db.collection("students").document(uid).delete()return {"message": f"學生 {uid} 已刪除（Auth 帳戶不存在）"}except Exception as e:raise HTTPException(status_code=500, detail=f"刪除學生失敗: {str(e)}")if name == "main":import uvicornapi_port = int(os.getenv("API_PORT", "8001"))uvicorn.run(app, host="0.0.0.0", port=api_port)
