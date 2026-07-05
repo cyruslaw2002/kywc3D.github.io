@@ -188,24 +188,19 @@ async def delete_photo_by_body(payload: dict = Body(...), admin=Depends(verify_a
         raise HTTPException(status_code=500, detail=f"刪除失敗: {str(e)}")
 
 
-@app.get("/api/admin/students")
-async def list_students_admin(admin=Depends(verify_admin)):
-    if db is None:
-        raise HTTPException(status_code=503, detail="Firestore 未初始化")
-    try:
-        docs = db.collection("students").stream()
-        students = []
-        for doc_item in docs:
-            data = doc_item.to_dict() or {}
-            students.append({"id": doc_item.id, **data})
-        return students
-    except NotFound:
-        raise HTTPException(
-            status_code=503,
-            detail="Firestore 資料庫尚未建立。請到 Firebase/Google Cloud 主控台建立 Firestore (Native mode) 後再重試。"
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"讀取學生資料失敗: {str(e)}")
+const API_BASE_URL = "https://vercel.app";
+
+fetch(`${API_BASE_URL}/api/admin/students`, {
+    method: "GET",
+    headers: {
+        // 如果 verify_admin 有防護，記得帶上你的 Token 認證
+        "Authorization": `Bearer ${localStorage.getItem('adminToken')}` 
+    }
+})
+.then(res => res.json())
+.then(data => console.log("成功從 Vercel 拿到學生資料！", data))
+.catch(err => console.error("連線失敗：", err));
+
 
 
 @app.post("/api/admin/students")
